@@ -24,11 +24,9 @@ function TypesAdmin() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("activity_types").insert({
       name: form.name,
       color: form.color,
-      created_by: u.user!.id,
     });
     if (error) return toast.error(error.message);
     setForm({ name: "", color: "#3b82f6" });
