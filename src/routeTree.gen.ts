@@ -17,6 +17,7 @@ import { Route as AuthenticatedPlanningIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
 import { Route as AuthenticatedPlanningNewRouteImport } from './routes/_authenticated/planning.new'
 import { Route as AuthenticatedPlanningIdRouteImport } from './routes/_authenticated/planning.$id'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -61,10 +62,16 @@ const AuthenticatedPlanningIdRoute = AuthenticatedPlanningIdRouteImport.update({
   path: '/planning/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/_authenticated/planning/new': typeof AuthenticatedPlanningNewRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/admin/users'
     | '/planning/$id'
     | '/planning/new'
     | '/notifications/'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/admin/users'
     | '/planning/$id'
     | '/planning/new'
     | '/notifications'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/admin/users'
     | '/_authenticated/planning/$id'
     | '/_authenticated/planning/new'
     | '/_authenticated/notifications/'
@@ -186,10 +198,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlanningIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedPlanningIdRoute: typeof AuthenticatedPlanningIdRoute
   AuthenticatedPlanningNewRoute: typeof AuthenticatedPlanningNewRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
@@ -198,6 +218,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedPlanningIdRoute: AuthenticatedPlanningIdRoute,
   AuthenticatedPlanningNewRoute: AuthenticatedPlanningNewRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
