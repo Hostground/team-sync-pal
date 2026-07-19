@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedPlanningIndexRouteImport } from './routes/_authenticated/planning.index'
+import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
 import { Route as AuthenticatedPlanningNewRouteImport } from './routes/_authenticated/planning.new'
 import { Route as AuthenticatedPlanningIdRouteImport } from './routes/_authenticated/planning.$id'
 
@@ -36,6 +37,12 @@ const AuthenticatedPlanningIndexRoute =
     path: '/planning/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedNotificationsIndexRoute =
+  AuthenticatedNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPlanningNewRoute =
   AuthenticatedPlanningNewRouteImport.update({
     id: '/planning/new',
@@ -53,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
+  '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/planning/': typeof AuthenticatedPlanningIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,6 +68,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/planning': typeof AuthenticatedPlanningIndexRoute
 }
 export interface FileRoutesById {
@@ -69,13 +78,26 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/_authenticated/planning/new': typeof AuthenticatedPlanningNewRoute
+  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/planning/': typeof AuthenticatedPlanningIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/planning/$id' | '/planning/new' | '/planning/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/planning/$id'
+    | '/planning/new'
+    | '/notifications/'
+    | '/planning/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/planning/$id' | '/planning/new' | '/planning'
+  to:
+    | '/'
+    | '/auth'
+    | '/planning/$id'
+    | '/planning/new'
+    | '/notifications'
+    | '/planning'
   id:
     | '__root__'
     | '/'
@@ -83,6 +105,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/planning/$id'
     | '/_authenticated/planning/new'
+    | '/_authenticated/notifications/'
     | '/_authenticated/planning/'
   fileRoutesById: FileRoutesById
 }
@@ -122,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlanningIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications/': {
+      id: '/_authenticated/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/planning/new': {
       id: '/_authenticated/planning/new'
       path: '/planning/new'
@@ -142,12 +172,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlanningIdRoute: typeof AuthenticatedPlanningIdRoute
   AuthenticatedPlanningNewRoute: typeof AuthenticatedPlanningNewRoute
+  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedPlanningIndexRoute: typeof AuthenticatedPlanningIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlanningIdRoute: AuthenticatedPlanningIdRoute,
   AuthenticatedPlanningNewRoute: AuthenticatedPlanningNewRoute,
+  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedPlanningIndexRoute: AuthenticatedPlanningIndexRoute,
 }
 
