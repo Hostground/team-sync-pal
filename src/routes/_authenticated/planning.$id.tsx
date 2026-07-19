@@ -37,16 +37,23 @@ function ActivityDetail() {
   const { data: a, refetch } = useQuery({
     queryKey: ["activity", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: act } = await supabase
         .from("activities")
-        .select(
-          `*, activity_types(name,color),
-           assignee:profiles!activities_assignee_id_fkey(full_name,email),
-           creator:profiles!activities_created_by_fkey(full_name,email)`,
-        )
+        .select("*, activity_types(name,color)")
         .eq("id", id)
         .maybeSingle();
-      return data;
+      if (!act) return null;
+      const ids = Array.from(new Set([act.assignee_id, act.created_by]));
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,full_name,email")
+        .in("id", ids);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      return {
+        ...act,
+        assignee: map.get(act.assignee_id),
+        creator: map.get(act.created_by),
+      } as any;
     },
   });
 
