@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedPlanningIndexRouteImport } from './routes/_authenticated/planning.index'
+import { Route as AuthenticatedPlanningNewRouteImport } from './routes/_authenticated/planning.new'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,15 +35,23 @@ const AuthenticatedPlanningIndexRoute =
     path: '/planning/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPlanningNewRoute =
+  AuthenticatedPlanningNewRouteImport.update({
+    id: '/planning/new',
+    path: '/planning/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/planning/new': typeof AuthenticatedPlanningNewRoute
   '/planning/': typeof AuthenticatedPlanningIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/planning/new': typeof AuthenticatedPlanningNewRoute
   '/planning': typeof AuthenticatedPlanningIndexRoute
 }
 export interface FileRoutesById {
@@ -50,18 +59,20 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/planning/new': typeof AuthenticatedPlanningNewRoute
   '/_authenticated/planning/': typeof AuthenticatedPlanningIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/planning/'
+  fullPaths: '/' | '/auth' | '/planning/new' | '/planning/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/planning'
+  to: '/' | '/auth' | '/planning/new' | '/planning'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/planning/new'
     | '/_authenticated/planning/'
   fileRoutesById: FileRoutesById
 }
@@ -101,14 +112,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlanningIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/planning/new': {
+      id: '/_authenticated/planning/new'
+      path: '/planning/new'
+      fullPath: '/planning/new'
+      preLoaderRoute: typeof AuthenticatedPlanningNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPlanningNewRoute: typeof AuthenticatedPlanningNewRoute
   AuthenticatedPlanningIndexRoute: typeof AuthenticatedPlanningIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPlanningNewRoute: AuthenticatedPlanningNewRoute,
   AuthenticatedPlanningIndexRoute: AuthenticatedPlanningIndexRoute,
 }
 
