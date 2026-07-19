@@ -14,16 +14,449 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          assignee_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          end_at: string
+          id: string
+          location: string | null
+          reminder_sent_at: string | null
+          respond_by: string
+          responded_at: string | null
+          response_note: string | null
+          start_at: string
+          status: Database["public"]["Enums"]["activity_status"]
+          template_id: string | null
+          title: string
+          type_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignee_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_at: string
+          id?: string
+          location?: string | null
+          reminder_sent_at?: string | null
+          respond_by: string
+          responded_at?: string | null
+          response_note?: string | null
+          start_at: string
+          status?: Database["public"]["Enums"]["activity_status"]
+          template_id?: string | null
+          title: string
+          type_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_at?: string
+          id?: string
+          location?: string | null
+          reminder_sent_at?: string | null
+          respond_by?: string
+          responded_at?: string | null
+          response_note?: string | null
+          start_at?: string
+          status?: Database["public"]["Enums"]["activity_status"]
+          template_id?: string | null
+          title?: string
+          type_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "activity_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "activity_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          location: string | null
+          name: string
+          title: string
+          type_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          location?: string | null
+          name: string
+          title: string
+          type_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          location?: string | null
+          name?: string
+          title?: string
+          type_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_templates_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "activity_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_types: {
+        Row: {
+          active: boolean
+          color: string
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          color?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          color?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      notification_deliveries: {
+        Row: {
+          channel: Database["public"]["Enums"]["notif_channel"]
+          created_at: string
+          delivered_at: string | null
+          error: string | null
+          id: string
+          notification_id: string
+          provider_message_id: string | null
+          read_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["delivery_status"]
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["notif_channel"]
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          notification_id: string
+          provider_message_id?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notif_channel"]
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          notification_id?: string
+          provider_message_id?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          activity_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          activity_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          notif_email: boolean
+          notif_inapp: boolean
+          notif_push: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          notif_email?: boolean
+          notif_inapp?: boolean
+          notif_push?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          notif_email?: boolean
+          notif_inapp?: boolean
+          notif_push?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_seen_at: string | null
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_seen_at?: string | null
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_seen_at?: string | null
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      response_tokens: {
+        Row: {
+          activity_id: string
+          created_at: string
+          expires_at: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          expires_at: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          expires_at?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "response_tokens_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      webauthn_credentials: {
+        Row: {
+          created_at: string
+          credential_id: string
+          device_name: string | null
+          id: string
+          last_used_at: string | null
+          public_key: string
+          sign_count: number
+          transports: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id: string
+          device_name?: string | null
+          id?: string
+          last_used_at?: string | null
+          public_key: string
+          sign_count?: number
+          transports?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string
+          device_name?: string | null
+          id?: string
+          last_used_at?: string | null
+          public_key?: string
+          sign_count?: number
+          transports?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_user_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      activity_status:
+        | "pending"
+        | "confirmed"
+        | "declined"
+        | "auto_declined"
+        | "cancelled"
+      app_role: "admin" | "management" | "employee"
+      delivery_status:
+        | "queued"
+        | "sent"
+        | "delivered"
+        | "read"
+        | "failed"
+        | "bounced"
+      notif_channel: "email" | "push" | "inapp"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +583,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_status: [
+        "pending",
+        "confirmed",
+        "declined",
+        "auto_declined",
+        "cancelled",
+      ],
+      app_role: ["admin", "management", "employee"],
+      delivery_status: [
+        "queued",
+        "sent",
+        "delivered",
+        "read",
+        "failed",
+        "bounced",
+      ],
+      notif_channel: ["email", "push", "inapp"],
+    },
   },
 } as const
