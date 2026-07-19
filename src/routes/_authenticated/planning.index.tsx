@@ -28,15 +28,16 @@ function PlanningList() {
     queryKey: ["activities", me?.user.id],
     enabled: !!me?.user.id,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: acts } = await supabase
         .from("activities")
-        .select(
-          `id,title,start_at,end_at,location,status,respond_by,assignee_id,created_by,
-           activity_types(name,color),
-           assignee:profiles!activities_assignee_id_fkey(full_name,email)`,
-        )
+        .select("*, activity_types(name,color)")
         .order("start_at", { ascending: true });
-      return data ?? [];
+      const ids = Array.from(new Set((acts ?? []).map((a) => a.assignee_id)));
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("id,full_name,email").in("id", ids)
+        : { data: [] as any[] };
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      return (acts ?? []).map((a) => ({ ...a, assignee: map.get(a.assignee_id) }));
     },
   });
 
