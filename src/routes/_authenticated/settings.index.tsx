@@ -15,7 +15,7 @@ function SettingsPage() {
   const { data: me, refetch } = useCurrentUser();
   const qc = useQueryClient();
 
-  const update = async (patch: Record<string, boolean>) => {
+  const update = async (patch: { notif_inapp?: boolean; notif_email?: boolean; notif_push?: boolean }) => {
     if (!me?.user.id) return;
     const { error } = await supabase.from("profiles").update(patch).eq("id", me.user.id);
     if (error) return toast.error(error.message);
