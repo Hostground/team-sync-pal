@@ -129,10 +129,20 @@ export const respondActivity = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // Read previous status for audit trail
+    const { data: prev } = await supabase
+      .from("activities")
+      .select("status")
+      .eq("id", data.activity_id)
+      .eq("assignee_id", userId)
+      .maybeSingle();
+    const previousStatus = prev?.status ?? null;
+
+    const newStatus = data.action === "confirm" ? "confirmed" : "declined";
     const { data: activity, error } = await supabase
       .from("activities")
       .update({
-        status: data.action === "confirm" ? "confirmed" : "declined",
+        status: newStatus,
         responded_at: new Date().toISOString(),
         response_note: data.note ?? null,
       })
@@ -143,8 +153,22 @@ export const respondActivity = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!activity) throw new Error("Activiteit niet gevonden");
 
-    // Notify creator
+    // Notify creator + write audit log via admin
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    try {
+      await supabaseAdmin.from("activity_audit_log").insert({
+        activity_id: activity.id,
+        actor_id: userId,
+        action: newStatus,
+        note: data.note ?? null,
+        previous_status: previousStatus,
+        new_status: newStatus,
+      });
+    } catch (e) {
+      console.error("audit log insert failed", e);
+    }
+
     const label = data.action === "confirm" ? "bevestigd" : "geweigerd";
     const { data: notif } = await supabaseAdmin
       .from("notifications")
@@ -166,6 +190,7 @@ export const respondActivity = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
 
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
