@@ -85,13 +85,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Plan activiteiten, wijs medewerkers toe en volg bevestigingen — met meldingen via e-mail, push en in-app.",
       },
-      { property: "og:title", content: "Planning" },
+      { property: "og:title", content: "Planning — team activiteiten plannen en bevestigen" },
       {
         property: "og:description",
-        content: "Team activiteiten plannen met bevestigingsflow en meldingen.",
+        content: "Plan activiteiten, wijs medewerkers toe en volg bevestigingen — met meldingen via e-mail, push en in-app.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Planning — team activiteiten plannen en bevestigen" },
+      { name: "twitter:description", content: "Plan activiteiten, wijs medewerkers toe en volg bevestigingen — met meldingen via e-mail, push en in-app." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eed56457-9eae-4c1a-913a-72be9274bcb8/id-preview-d424aae8--32e63974-1ae1-4dd1-9623-8fd203af5668.lovable.app-1784912171885.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/eed56457-9eae-4c1a-913a-72be9274bcb8/id-preview-d424aae8--32e63974-1ae1-4dd1-9623-8fd203af5668.lovable.app-1784912171885.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
