@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Menu,
   X,
+  ClipboardList,
 } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
