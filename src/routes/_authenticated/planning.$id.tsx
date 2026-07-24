@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { respondActivity } from "@/lib/planning.functions";
+import { respondActivity, getActivityAuditLog } from "@/lib/planning.functions";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
