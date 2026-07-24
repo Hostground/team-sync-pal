@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Menu,
   X,
+  ClipboardList,
 } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -71,7 +73,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const nav = [
     { to: "/planning", label: "Planning", icon: CalendarDays, show: true },
+    { to: "/overzicht", label: "Overzicht", icon: ClipboardList, show: isStaff(me?.role) },
     { to: "/notifications", label: "Meldingen", icon: Bell, show: true, badge: unread },
+
     { to: "/templates", label: "Sjablonen", icon: FileText, show: isStaff(me?.role) },
     { to: "/admin/users", label: "Gebruikers", icon: Users, show: me?.role === "admin" },
     { to: "/admin/types", label: "Activiteitstypes", icon: Tags, show: me?.role === "admin" },

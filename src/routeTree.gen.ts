@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates.index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedPlanningIndexRouteImport } from './routes/_authenticated/planning.index'
+import { Route as AuthenticatedOverzichtIndexRouteImport } from './routes/_authenticated/overzicht.index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
 import { Route as AuthenticatedPlanningNewRouteImport } from './routes/_authenticated/planning.new'
 import { Route as AuthenticatedPlanningIdRouteImport } from './routes/_authenticated/planning.$id'
@@ -53,6 +54,12 @@ const AuthenticatedPlanningIndexRoute =
     path: '/planning/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOverzichtIndexRoute =
+  AuthenticatedOverzichtIndexRouteImport.update({
+    id: '/overzicht/',
+    path: '/overzicht/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNotificationsIndexRoute =
   AuthenticatedNotificationsIndexRouteImport.update({
     id: '/notifications/',
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
+  '/overzicht/': typeof AuthenticatedOverzichtIndexRoute
   '/planning/': typeof AuthenticatedPlanningIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/templates/': typeof AuthenticatedTemplatesIndexRoute
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
+  '/overzicht': typeof AuthenticatedOverzichtIndexRoute
   '/planning': typeof AuthenticatedPlanningIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
@@ -115,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/_authenticated/planning/new': typeof AuthenticatedPlanningNewRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
+  '/_authenticated/overzicht/': typeof AuthenticatedOverzichtIndexRoute
   '/_authenticated/planning/': typeof AuthenticatedPlanningIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/planning/$id'
     | '/planning/new'
     | '/notifications/'
+    | '/overzicht/'
     | '/planning/'
     | '/settings/'
     | '/templates/'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/planning/$id'
     | '/planning/new'
     | '/notifications'
+    | '/overzicht'
     | '/planning'
     | '/settings'
     | '/templates'
@@ -154,6 +166,7 @@ export interface FileRouteTypes {
     | '/_authenticated/planning/$id'
     | '/_authenticated/planning/new'
     | '/_authenticated/notifications/'
+    | '/_authenticated/overzicht/'
     | '/_authenticated/planning/'
     | '/_authenticated/settings/'
     | '/_authenticated/templates/'
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlanningIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/overzicht/': {
+      id: '/_authenticated/overzicht/'
+      path: '/overzicht'
+      fullPath: '/overzicht/'
+      preLoaderRoute: typeof AuthenticatedOverzichtIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications/': {
       id: '/_authenticated/notifications/'
       path: '/notifications'
@@ -253,6 +273,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlanningIdRoute: typeof AuthenticatedPlanningIdRoute
   AuthenticatedPlanningNewRoute: typeof AuthenticatedPlanningNewRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
+  AuthenticatedOverzichtIndexRoute: typeof AuthenticatedOverzichtIndexRoute
   AuthenticatedPlanningIndexRoute: typeof AuthenticatedPlanningIndexRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
   AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
@@ -264,6 +285,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlanningIdRoute: AuthenticatedPlanningIdRoute,
   AuthenticatedPlanningNewRoute: AuthenticatedPlanningNewRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
+  AuthenticatedOverzichtIndexRoute: AuthenticatedOverzichtIndexRoute,
   AuthenticatedPlanningIndexRoute: AuthenticatedPlanningIndexRoute,
   AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
   AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
@@ -280,13 +302,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

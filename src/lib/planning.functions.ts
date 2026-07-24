@@ -129,10 +129,20 @@ export const respondActivity = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
+    // Read previous status for audit trail
+    const { data: prev } = await supabase
+      .from("activities")
+      .select("status")
+      .eq("id", data.activity_id)
+      .eq("assignee_id", userId)
+      .maybeSingle();
+    const previousStatus = prev?.status ?? null;
+
+    const newStatus = data.action === "confirm" ? "confirmed" : "declined";
     const { data: activity, error } = await supabase
       .from("activities")
       .update({
-        status: data.action === "confirm" ? "confirmed" : "declined",
+        status: newStatus,
         responded_at: new Date().toISOString(),
         response_note: data.note ?? null,
       })
@@ -143,8 +153,22 @@ export const respondActivity = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!activity) throw new Error("Activiteit niet gevonden");
 
-    // Notify creator
+    // Notify creator + write audit log via admin
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    try {
+      await supabaseAdmin.from("activity_audit_log").insert({
+        activity_id: activity.id,
+        actor_id: userId,
+        action: newStatus,
+        note: data.note ?? null,
+        previous_status: previousStatus,
+        new_status: newStatus,
+      });
+    } catch (e) {
+      console.error("audit log insert failed", e);
+    }
+
     const label = data.action === "confirm" ? "bevestigd" : "geweigerd";
     const { data: notif } = await supabaseAdmin
       .from("notifications")
@@ -166,6 +190,7 @@ export const respondActivity = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
 
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -249,4 +274,88 @@ export const adminSetRole = createServerFn({ method: "POST" })
     await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
     await supabaseAdmin.from("user_roles").insert({ user_id: data.user_id, role: data.role });
     return { ok: true };
+  });
+
+const OverviewFiltersSchema = z.object({
+  status: z.enum(["pending", "confirmed", "declined", "auto_declined", "cancelled"]).optional(),
+  assignee_id: z.string().uuid().optional(),
+  type_id: z.string().uuid().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  only_unread: z.boolean().optional(),
+});
+
+export const getActivityOverview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => OverviewFiltersSchema.parse(data ?? {}))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await assertStaff(supabase, userId);
+
+    let q = supabase
+      .from("activities")
+      .select(
+        "*, activity_types(name,color), notifications(id,type,created_at,notification_deliveries(channel,status,sent_at,read_at)), activity_audit_log(id,action,note,actor_id,created_at,previous_status,new_status)"
+      )
+      .order("start_at", { ascending: false })
+      .limit(500);
+
+    if (data.status) q = q.eq("status", data.status);
+    if (data.assignee_id) q = q.eq("assignee_id", data.assignee_id);
+    if (data.type_id) q = q.eq("type_id", data.type_id);
+    if (data.from) q = q.gte("start_at", data.from);
+    if (data.to) q = q.lte("start_at", data.to);
+
+    const { data: acts, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const userIds = new Set<string>();
+    (acts ?? []).forEach((a: any) => {
+      userIds.add(a.assignee_id);
+      userIds.add(a.created_by);
+      (a.activity_audit_log ?? []).forEach((r: any) => r.actor_id && userIds.add(r.actor_id));
+    });
+    const { data: profs } = userIds.size
+      ? await supabase.from("profiles").select("id,full_name,email").in("id", Array.from(userIds))
+      : { data: [] as any[] };
+    const pmap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+
+    let results = (acts ?? []).map((a: any) => ({
+      ...a,
+      assignee: pmap.get(a.assignee_id) ?? null,
+      creator: pmap.get(a.created_by) ?? null,
+      activity_audit_log: (a.activity_audit_log ?? []).map((r: any) => ({
+        ...r,
+        actor: r.actor_id ? pmap.get(r.actor_id) ?? null : null,
+      })),
+    }));
+
+    if (data.only_unread) {
+      results = results.filter((a: any) =>
+        (a.notifications ?? []).some((n: any) =>
+          (n.notification_deliveries ?? []).some((d: any) => d.channel === "inapp" && !d.read_at),
+        ),
+      );
+    }
+
+    return results;
+  });
+
+export const getActivityAuditLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ activity_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase
+      .from("activity_audit_log")
+      .select("*")
+      .eq("activity_id", data.activity_id)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.actor_id).filter(Boolean)));
+    const { data: profs } = ids.length
+      ? await supabase.from("profiles").select("id,full_name,email").in("id", ids)
+      : { data: [] as any[] };
+    const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+    return (rows ?? []).map((r: any) => ({ ...r, actor: r.actor_id ? map.get(r.actor_id) ?? null : null }));
   });
