@@ -70,6 +70,15 @@ function ActivityDetail() {
     },
   });
 
+  const fetchAudit = useServerFn(getActivityAuditLog);
+  const { data: audit = [] } = useQuery({
+    queryKey: ["activity-audit", id],
+    enabled: !!a && isStaff(me?.role),
+    queryFn: () => fetchAudit({ data: { activity_id: id } }),
+  });
+
+
+
   if (!a) return <p className="text-sm text-muted-foreground">Laden…</p>;
 
   const st = statusMeta[a.status] ?? statusMeta.pending;
