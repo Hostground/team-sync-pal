@@ -208,6 +208,34 @@ function ActivityDetail() {
           </CardContent>
         </Card>
       )}
+
+      {isStaff(me?.role) && audit.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" /> Geschiedenis
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {audit.map((r: any) => (
+              <div key={r.id} className="border-b pb-2 last:border-0">
+                <div className="flex items-center justify-between gap-2">
+                  <Badge variant="outline" className="text-xs">{r.action}</Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(r.created_at), "d MMM yyyy HH:mm", { locale: nl })}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  door {r.actor?.full_name ?? r.actor?.email ?? "systeem"}
+                  {r.previous_status && r.new_status && ` · ${r.previous_status} → ${r.new_status}`}
+                </p>
+                {r.note && <p className="text-sm mt-1 whitespace-pre-wrap">{r.note}</p>}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
+
