@@ -89,6 +89,51 @@ export type Database = {
           },
         ]
       }
+      activity_audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          activity_id: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          new_status: Database["public"]["Enums"]["activity_status"] | null
+          note: string | null
+          previous_status: Database["public"]["Enums"]["activity_status"] | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          activity_id: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["activity_status"] | null
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["activity_status"]
+            | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          activity_id?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["activity_status"] | null
+          note?: string | null
+          previous_status?:
+            | Database["public"]["Enums"]["activity_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_audit_log_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_templates: {
         Row: {
           created_at: string
@@ -449,6 +494,12 @@ export type Database = {
         | "auto_declined"
         | "cancelled"
       app_role: "admin" | "management" | "employee"
+      audit_action:
+        | "confirmed"
+        | "declined"
+        | "auto_declined"
+        | "cancelled"
+        | "rescheduled"
       delivery_status:
         | "queued"
         | "sent"
@@ -592,6 +643,13 @@ export const Constants = {
         "cancelled",
       ],
       app_role: ["admin", "management", "employee"],
+      audit_action: [
+        "confirmed",
+        "declined",
+        "auto_declined",
+        "cancelled",
+        "rescheduled",
+      ],
       delivery_status: [
         "queued",
         "sent",
