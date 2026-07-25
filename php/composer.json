@@ -1,0 +1,15 @@
+{
+  "name": "planning/php",
+  "description": "Zelf-gehost planning-systeem (cPanel)",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "phpmailer/phpmailer": "^6.9",
+    "minishlink/web-push": "^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  }
+}
