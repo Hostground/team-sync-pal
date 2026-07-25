@@ -1,61 +1,98 @@
-## Doel
+## Plan: Auto-escalatie cron + PHP/MySQL versie
 
-Voeg een audit-log toe voor bevestigen/weigeren van activiteiten en een overzichtspagina voor management/admin met filters op meldingsstatus per activiteit. Beide worden geïmplementeerd in de Lovable-app én meegenomen in het PHP/MySQL-schema.
+### Deel 1 — Auto-escalatie (Lovable app)
 
-## 1. Database (Lovable Cloud migratie)
+**Doel:** Activiteiten met status `pending` waarvan de bevestigingstermijn is verstreken, automatisch op `auto_declined` zetten, een audit-regel schrijven, en het management notificeren.
 
-Nieuwe tabel `activity_audit_log`:
-- `activity_id` (FK activities)
-- `actor_id` (FK auth.users) — wie de actie deed
-- `action` (enum: `confirmed`, `declined`, `auto_declined`, `cancelled`, `rescheduled`)
-- `note` (text, optioneel) — reden/nota
-- `previous_status`, `new_status` (activity_status)
-- `created_at`
+1. **Instelling voor termijn** — kolom `confirm_deadline_hours` op `activities` (of afleiden uit `settings` tabel met een globale default, bv. 24u). Bij het aanmaken van een activiteit wordt `confirm_deadline_at` berekend en opgeslagen.
+2. **Server route** `src/routes/api/public/hooks/auto-escalate.ts` (POST):
+   - Verifieert `apikey` header (Supabase anon key).
+   - Zoekt alle `pending` activiteiten waar `confirm_deadline_at < now()`.
+   - Zet status → `auto_declined`, schrijft `activity_audit_log` (action `auto_declined`), maakt notificaties aan voor alle management + admins.
+3. **pg_cron job** — elke 5 minuten `net.http_post` naar de bovenstaande route.
+4. **UI** — badge/label "Verlopen" op de overzichtspagina en detailpagina; kolom `confirm_deadline_at` tonen; management kan alsnog handmatig herplannen.
 
-RLS:
-- INSERT: alleen via server functions (service role) — geen policy voor `authenticated`.
-- SELECT: eigen rijen (`actor_id = auth.uid()`), of de assignee/creator van de activiteit, of admin/management via `has_role`.
-- GRANT SELECT/INSERT aan `authenticated`, ALL aan `service_role`.
+### Deel 2 — PHP/MySQL versie (zelf-hosted op cPanel)
 
-## 2. Server functions
+Nieuwe map `php/` naast de bestaande Lovable-app. Werkt volledig standalone.
 
-`src/lib/planning.functions.ts`:
-- `respondActivity`: bij succesvol update een rij in `activity_audit_log` schrijven (`actor_id = userId`, `action = confirm|decline`, `note`, previous/new status).
-- Nieuwe `getActivityOverview` (staff-only): geeft alle activiteiten terug met geaggregeerde meldingsstatus (aantal per kanaal: verzonden, gelezen) + laatste audit-actie. Filters: status, datumbereik, medewerker, activity_type, alleen ongeziene.
-- Nieuwe `getActivityAuditLog`: audit-rijen per activiteit (staff-only).
+**Structuur:**
+```text
+php/
+  README.md                installatie-instructies (cPanel, SMTP, cron)
+  config/
+    config.example.php     DB, SMTP, VAPID, app-URL
+    schema.sql             volledig MySQL schema
+    seed.sql               demo activiteitstypes
+  public/                  document root voor cPanel
+    index.php              front controller / router
+    assets/                css, js (bell, WebAuthn, push subscribe)
+    sw.js                  service worker voor push
+  src/
+    Auth.php               login, sessies, WebAuthn register/assert
+    Db.php                 PDO wrapper
+    Mailer.php             PHPMailer via SMTP
+    Push.php               web-push (VAPID) via minimalistische lib of composer
+    Router.php
+    Csrf.php
+    Controllers/
+      AuthController.php
+      PlanningController.php
+      TemplateController.php
+      NotificationController.php
+      OverviewController.php
+      AdminController.php
+      ApiController.php    respond-token endpoint, mark-read, subscribe
+    Models/ (Activity, User, Role, Notification, AuditLog, Template, Type)
+    Views/                 PHP templates (layout + per pagina)
+  cron/
+    auto_escalate.php      CLI script, uitgevoerd via cPanel cron elke 5 min
+    send_reminders.php     optioneel: herinnering vlak voor deadline
+  vendor/                  composer install output (PHPMailer, web-push)
+  composer.json
+```
 
-Auto-decline cron (later) schrijft óók naar `activity_audit_log` met `action='auto_declined'`.
+**MySQL schema** (`config/schema.sql`) — 1-op-1 met de Supabase-tabellen:
+- `users` (id, email, password_hash, full_name, phone, biometric_enabled, notif_email/push/inapp, created_at)
+- `user_roles` (user_id, role ENUM admin/management/employee)
+- `activity_types`, `activities` (incl. `confirm_deadline_at`, `status` ENUM)
+- `activity_templates`
+- `notifications`, `notification_deliveries` (kanaal ENUM email/push/inapp, status, read_at)
+- `response_tokens` (voor e-mail bevestig/weiger links)
+- `webauthn_credentials`
+- `push_subscriptions` (endpoint, p256dh, auth)
+- `activity_audit_log` (action ENUM confirmed/declined/auto_declined/rescheduled/created)
+- `settings` (key/value voor globale defaults, VAPID public/private)
 
-## 3. UI
+**Functionaliteit pariteit met Lovable-app:**
+- Login e-mail/wachtwoord + optionele WebAuthn (server-side challenge, opslag public key).
+- Rollen: admin, management, employee (middleware in Router).
+- Management maakt activiteit → medewerker krijgt e-mail (met tokenlink `/api/respond?token=…`) + web-push + in-app bell.
+- Medewerker bevestigt/weigert (met optionele nota) via web of e-maillink → audit-log entry.
+- Sjablonen opslaan/hergebruiken.
+- Overzichtspagina met dezelfde filters (status, medewerker, type, datum, ongelezen) + per-activiteit meldingsstatus + uitklapbare audit-log.
+- Instellingen per gebruiker (notificatie-kanalen, WebAuthn).
+- Admin: gebruikersbeheer, rollen, activiteitstypes.
 
-**Nieuwe route** `src/routes/_authenticated/overzicht.index.tsx` (management/admin):
-- Filters bovenaan: status (pending/confirmed/declined/auto_declined), datumbereik, medewerker, activity_type, "alleen ongelezen meldingen".
-- Tabel/lijst per activiteit met kolommen: titel, medewerker, start, status, meldingsstatus-badges (email/push/inapp: queued/sent/read), laatste audit-actie.
-- Detailpaneel/expand met alle `notification_deliveries` per melding en de volledige audit-log.
-- Link naar `/planning/$id`.
+**Cron (`cron/auto_escalate.php`):**
+- Draait via cPanel-cronjob: `*/5 * * * * /usr/bin/php /home/USER/planning/php/cron/auto_escalate.php`.
+- Zelfde logica als de server route: verlopen → `auto_declined`, audit-log, notificatie naar management.
 
-**Update** `src/routes/_authenticated/planning.$id.tsx`:
-- Extra sectie "Geschiedenis" voor staff: toont audit-log rijen (wie, wat, wanneer, nota).
+**Deliverables PHP-tak:**
+- Volledig schema + seed.
+- Alle controllers/views voor pariteit.
+- `README.md` met stappen: DB aanmaken, `config.php` invullen, `composer install`, VAPID sleutels genereren, cronjobs instellen, cPanel document root wijzen naar `public/`.
 
-**Update** `src/components/AppShell.tsx`:
-- Navigatie-item "Overzicht" toevoegen, alleen zichtbaar voor admin/management.
+### Volgorde van uitvoering
 
-## 4. PHP/MySQL versie
+1. Migratie: kolom `confirm_deadline_at` + default in `settings`.
+2. Server route `auto-escalate` + pg_cron.
+3. UI-badges "Verlopen".
+4. PHP: schema + config + Router/Auth/Db basis.
+5. PHP: planning, templates, notifications, overzicht, admin.
+6. PHP: WebAuthn + push + e-mail.
+7. PHP: cron scripts + README.
 
-Uitbreiding van het geplande MySQL-schema:
-- Tabel `activity_audit_log` met dezelfde kolommen (`activity_id`, `actor_id`, `action` ENUM, `note`, `previous_status`, `new_status`, `created_at`).
-- FKs met `ON DELETE CASCADE` naar `activities`, `ON DELETE SET NULL` naar `users`.
-- Index op `(activity_id, created_at)`.
+### Open punt
 
-PHP endpoints/pagina's:
-- `respond.php`: schrijft na status-update een audit-rij.
-- `cron_auto_decline.php`: schrijft audit-rij met `auto_declined`.
-- `overzicht.php`: staff-only pagina met dezelfde filters en samengevoegde melding/audit-weergave (server-side render, GET-filters).
-- `activity.php`: geschiedenis-sectie voor staff.
-
-## Technische details
-
-- `previous_status`/`new_status` maken later rapportage mogelijk (bv. hoeveel keer omgezet van pending→confirmed).
-- Bestaande `notifications` + `notification_deliveries` blijven de bron voor meldingsstatus; het overzicht joint hierop, geen duplicatie.
-- Audit-rij wordt in dezelfde server-fn geschreven als de status-update; bij fout op audit wordt de request niet gefaald (log & doorgaan) om te vermijden dat een geldige bevestiging omvalt.
-- Staff-check via bestaande `has_role`/`assertStaff`-patroon.
+Standaard bevestigingstermijn — voorstel: **24 uur**, per activiteit overschrijfbaar door management bij aanmaken. OK zo, of liever een andere default?
