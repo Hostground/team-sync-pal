@@ -107,10 +107,12 @@ function PlanningList() {
                       </span>
                     )}
                     {a.status === "pending" && (
-                      <span>
-                        Reageren voor {format(new Date(a.respond_by), "d MMM HH:mm", { locale: nl })}
+                      <span className={new Date(a.respond_by) < new Date() ? "text-destructive font-medium" : ""}>
+                        {new Date(a.respond_by) < new Date() ? "Verlopen — " : "Reageren voor "}
+                        {format(new Date(a.respond_by), "d MMM HH:mm", { locale: nl })}
                       </span>
                     )}
+
                   </CardContent>
                 </Card>
               </Link>

@@ -21,6 +21,7 @@ import { Route as AuthenticatedPlanningNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPlanningIdRouteImport } from './routes/_authenticated/planning.$id'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminTypesRouteImport } from './routes/_authenticated/admin.types'
+import { Route as ApiPublicHooksAutoEscalateRouteImport } from './routes/api/public/hooks/auto-escalate'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -87,6 +88,12 @@ const AuthenticatedAdminTypesRoute = AuthenticatedAdminTypesRouteImport.update({
   path: '/admin/types',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicHooksAutoEscalateRoute =
+  ApiPublicHooksAutoEscalateRouteImport.update({
+    id: '/api/public/hooks/auto-escalate',
+    path: '/api/public/hooks/auto-escalate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/planning/': typeof AuthenticatedPlanningIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/api/public/hooks/auto-escalate': typeof ApiPublicHooksAutoEscalateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -113,6 +121,7 @@ export interface FileRoutesByTo {
   '/planning': typeof AuthenticatedPlanningIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
+  '/api/public/hooks/auto-escalate': typeof ApiPublicHooksAutoEscalateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,6 +137,7 @@ export interface FileRoutesById {
   '/_authenticated/planning/': typeof AuthenticatedPlanningIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/api/public/hooks/auto-escalate': typeof ApiPublicHooksAutoEscalateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/planning/'
     | '/settings/'
     | '/templates/'
+    | '/api/public/hooks/auto-escalate'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/planning'
     | '/settings'
     | '/templates'
+    | '/api/public/hooks/auto-escalate'
   id:
     | '__root__'
     | '/'
@@ -170,12 +182,14 @@ export interface FileRouteTypes {
     | '/_authenticated/planning/'
     | '/_authenticated/settings/'
     | '/_authenticated/templates/'
+    | '/api/public/hooks/auto-escalate'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicHooksAutoEscalateRoute: typeof ApiPublicHooksAutoEscalateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -264,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTypesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/auto-escalate': {
+      id: '/api/public/hooks/auto-escalate'
+      path: '/api/public/hooks/auto-escalate'
+      fullPath: '/api/public/hooks/auto-escalate'
+      preLoaderRoute: typeof ApiPublicHooksAutoEscalateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -298,17 +319,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicHooksAutoEscalateRoute: ApiPublicHooksAutoEscalateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
