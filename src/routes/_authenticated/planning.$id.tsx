@@ -147,10 +147,12 @@ function ActivityDetail() {
             </div>
           )}
           {a.status === "pending" && (
-            <p className="text-xs text-muted-foreground">
-              Reageren voor {format(new Date(a.respond_by), "EEE d MMM HH:mm", { locale: nl })}
+            <p className={"text-xs " + (new Date(a.respond_by) < new Date() ? "text-destructive font-medium" : "text-muted-foreground")}>
+              {new Date(a.respond_by) < new Date() ? "Verlopen — " : "Reageren voor "}
+              {format(new Date(a.respond_by), "EEE d MMM HH:mm", { locale: nl })}
             </p>
           )}
+
           {a.response_note && (
             <div className="rounded border p-2 bg-muted/30">
               <p className="text-xs font-medium">Reactie van medewerker</p>
