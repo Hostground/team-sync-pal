@@ -101,17 +101,20 @@ class AuthController {
     }
 
     public function webauthnLoginVerify(): void {
-        // Vereenvoudigde verificatie: challenge match op basis van sessie + credential aanwezig.
-        // Voor productie: gebruik een volledige WebAuthn library (bv. web-auth/webauthn-lib).
-        $in = json_decode(file_get_contents('php://input') ?: '{}', true);
-        $uid = $_SESSION['wa_user_id'] ?? null;
-        $credId = self::b64urlDecode($in['id'] ?? '');
-        if (!$uid || !$credId) { http_response_code(400); echo 'invalid'; return; }
-        $cred = Db::one('SELECT id FROM webauthn_credentials WHERE user_id = ? AND credential_id = ?', [$uid, $credId]);
-        if (!$cred) { http_response_code(401); echo 'unknown credential'; return; }
+        // SECURITY: A proper WebAuthn assertion verification is required here (verify
+        // clientDataJSON origin/type, authenticatorData RP ID hash and flags, the
+        // stored challenge, and the assertion signature against the stored public key).
+        // The previous implementation only checked that a credential row existed for
+        // the user, which allowed anyone knowing a victim's email to sign in as them.
+        // Disable this endpoint until a vetted WebAuthn library (e.g. web-auth/webauthn-lib)
+        // is wired up.
         unset($_SESSION['wa_challenge'], $_SESSION['wa_user_id']);
-        Auth::loginById($uid);
-        header('Content-Type: application/json'); echo json_encode(['ok'=>true,'redirect'=>'/planning']);
+        http_response_code(501);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'ok' => false,
+            'error' => 'Biometrische aanmelding is tijdelijk uitgeschakeld. Meld u aan met e-mail en wachtwoord.',
+        ]);
     }
 
     private static function b64url(string $b): string { return rtrim(strtr(base64_encode($b), '+/', '-_'), '='); }
