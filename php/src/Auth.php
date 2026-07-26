@@ -31,6 +31,19 @@ class Auth {
 
     public static function register(string $email, string $password, string $fullName): array {
         $email = strtolower(trim($email));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('Ongeldig e-mailadres.');
+        }
+        // Server-side password strength check (cannot be bypassed by skipping client validation).
+        if (strlen($password) < 10) {
+            throw new \RuntimeException('Wachtwoord moet minstens 10 tekens bevatten.');
+        }
+        if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            throw new \RuntimeException('Wachtwoord moet minstens één letter en één cijfer bevatten.');
+        }
+        if (trim($fullName) === '') {
+            throw new \RuntimeException('Volledige naam is verplicht.');
+        }
         if (Db::one('SELECT id FROM users WHERE email = ?', [$email])) {
             throw new \RuntimeException('E-mailadres is al in gebruik.');
         }
