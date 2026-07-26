@@ -27,7 +27,9 @@ if ($user) {
     <?php endif; ?>
     <a href="/notifications">Meldingen<?php if ($unread): ?> <span class="badge"><?= $unread ?></span><?php endif; ?></a>
     <?php if (Auth::isAdmin()): ?>
-      <a href="/admin/users">Beheer</a>
+      <a href="/admin/users">Gebruikers</a>
+      <a href="/admin/types">Types</a>
+      <a href="/admin/smtp">SMTP</a>
     <?php endif; ?>
     <a href="/settings">Instellingen</a>
     <form method="post" action="/logout" style="display:inline"><?= Csrf::field() ?><button class="linkbtn">Afmelden</button></form>
