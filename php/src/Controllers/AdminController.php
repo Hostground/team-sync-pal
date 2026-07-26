@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers;
 
-use App\{Auth, Db, View};
+use App\{Auth, Db, View, Mailer, Config};
 
 class AdminController {
     public function users(): void {
