@@ -10,22 +10,31 @@ export const Route = createFileRoute("/api/public/hooks/auto-escalate")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const providedKey =
-          request.headers.get("apikey") ||
-          request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        if (!providedKey || !expected || providedKey !== expected) {
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "content-type": "application/json" },
-          });
-        }
+        const providedSecret = request.headers.get("x-cron-secret") ?? "";
 
         const url = process.env.SUPABASE_URL!;
         const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
         const admin = createClient(url, serviceKey, {
           auth: { autoRefreshToken: false, persistSession: false },
         });
+
+        const { data: cfg } = await admin
+          .from("cron_config")
+          .select("cron_secret")
+          .eq("id", 1)
+          .maybeSingle();
+        const expected = cfg?.cron_secret ?? "";
+        // constant-time compare
+        const a = new TextEncoder().encode(providedSecret);
+        const b = new TextEncoder().encode(expected);
+        let mismatch = a.length ^ b.length;
+        for (let i = 0; i < Math.min(a.length, b.length); i++) mismatch |= a[i] ^ b[i];
+        if (!expected || mismatch !== 0) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { "content-type": "application/json" },
+          });
+        }
 
         const nowIso = new Date().toISOString();
         const { data: overdue, error: fetchErr } = await admin
