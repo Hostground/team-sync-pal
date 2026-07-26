@@ -205,6 +205,24 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_config: {
+        Row: {
+          created_at: string
+          cron_secret: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          cron_secret?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          cron_secret?: string
+          id?: number
+        }
+        Relationships: []
+      }
       notification_deliveries: {
         Row: {
           channel: Database["public"]["Enums"]["notif_channel"]
