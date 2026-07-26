@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers;
 
-use App\{Auth, Db, View};
+use App\{Auth, Db, View, Mailer, Config};
 
 class AdminController {
     public function users(): void {
@@ -48,5 +48,53 @@ class AdminController {
     public function deleteType(array $p): void {
         Db::q('DELETE FROM activity_types WHERE id=?', [$p['id']]);
         header('Location: /admin/types');
+    }
+
+    public function smtp(): void {
+        $current = Mailer::config();
+        $fileCfg = Config::get('smtp') ?: [];
+        $dbRows  = Db::all("SELECT `key`,`value` FROM settings WHERE `key` LIKE 'smtp.%'");
+        $overridden = [];
+        foreach ($dbRows as $r) $overridden[substr($r['key'],5)] = true;
+        $flash = $_SESSION['flash_smtp'] ?? null; unset($_SESSION['flash_smtp']);
+        View::render('admin/smtp', [
+            'title'=>'SMTP',
+            'cfg'=>$current,
+            'fileCfg'=>$fileCfg,
+            'overridden'=>$overridden,
+            'flash'=>$flash,
+        ]);
+    }
+
+    public function saveSmtp(): void {
+        $fields = ['host','port','username','password','secure','from','fromName'];
+        foreach ($fields as $f) {
+            $v = $_POST[$f] ?? '';
+            // Leeg + veld password: leeg opslaan overslaan zodat bestaand wachtwoord blijft
+            if ($f === 'password' && $v === '') continue;
+            if ($v === '') {
+                Db::q("DELETE FROM settings WHERE `key`=?", ['smtp.'.$f]);
+            } else {
+                Db::q("INSERT INTO settings(`key`,`value`) VALUES(?,?)
+                       ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)", ['smtp.'.$f, $v]);
+            }
+        }
+        $_SESSION['flash_smtp'] = ['type'=>'ok','msg'=>'SMTP-instellingen opgeslagen.'];
+        header('Location: /admin/smtp');
+    }
+
+    public function testSmtp(): void {
+        $to = trim($_POST['to'] ?? '');
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_smtp'] = ['type'=>'err','msg'=>'Ongeldig e-mailadres.'];
+            header('Location: /admin/smtp'); return;
+        }
+        $ok = Mailer::send($to, 'SMTP test — '.Config::get('app.name','Planning'),
+            '<p>Dit is een testbericht vanuit je Planning-app.</p><p>Als je dit ontvangt is SMTP correct ingesteld.</p>',
+            'Dit is een testbericht vanuit je Planning-app.');
+        $_SESSION['flash_smtp'] = $ok
+            ? ['type'=>'ok','msg'=>'Testmail verzonden naar '.$to]
+            : ['type'=>'err','msg'=>'Verzenden mislukt. Controleer instellingen en serverlogs.'];
+        header('Location: /admin/smtp');
     }
 }
