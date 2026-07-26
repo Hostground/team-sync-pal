@@ -68,5 +68,8 @@ $router->post('/admin/users/{id}/role', [\App\Controllers\AdminController::class
 $router->get('/admin/types',       [\App\Controllers\AdminController::class, 'types'], 'admin');
 $router->post('/admin/types',      [\App\Controllers\AdminController::class, 'saveType'], 'admin');
 $router->post('/admin/types/{id}/delete', [\App\Controllers\AdminController::class, 'deleteType'], 'admin');
+$router->get('/admin/smtp',        [\App\Controllers\AdminController::class, 'smtp'],     'admin');
+$router->post('/admin/smtp',       [\App\Controllers\AdminController::class, 'saveSmtp'], 'admin');
+$router->post('/admin/smtp/test',  [\App\Controllers\AdminController::class, 'testSmtp'], 'admin');
 
 $router->dispatch();
