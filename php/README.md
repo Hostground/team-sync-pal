@@ -5,6 +5,9 @@ rollen (admin/management/employee), activiteiten met types, sjablonen,
 e-mail + web-push + in-app meldingen, WebAuthn (vingerafdruk) login,
 audit-log, management-overzicht met filters, auto-escalatie via cron.
 
+> **Installeren op cPanel?** Volg de uitgebreide stap-voor-stap gids in
+> [`INSTALL_CPANEL.md`](INSTALL_CPANEL.md).
+
 ## Installatie op cPanel
 
 1. **Database aanmaken**
