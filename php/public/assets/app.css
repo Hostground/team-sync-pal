@@ -32,3 +32,21 @@
 .pill{display:inline-block;padding:.15rem .5rem;border-radius:999px;background:#f3f4f6;color:#374151;font-size:.75rem;margin-right:.25rem}
 .pill.warn{background:#fef3c7;color:#92400e}
 .error{color:var(--dan)}.ok{color:var(--ok)}
+
+/* Takenlijst (mobile-first) */
+.checklist{margin:1rem 0}
+.checklist-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.checklist-head h2{margin:0;font-size:1.05rem}
+.checklist-items{list-style:none;padding:0;margin:.6rem 0;display:flex;flex-direction:column}
+.checklist-items li{display:flex;align-items:center;gap:.6rem;padding:.65rem .1rem;border-bottom:1px solid var(--border)}
+.checklist-items li:last-child{border-bottom:none}
+.checklist-items input[type=checkbox]{width:1.35rem;height:1.35rem;flex:0 0 auto}
+.checklist-items .task-title{flex:1;min-width:0;word-break:break-word}
+.checklist-items li.done .task-title{text-decoration:line-through;color:var(--muted)}
+.checklist-items .task-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:.2rem .4rem}
+.checklist-add{display:flex;gap:.5rem;margin-top:.4rem}
+.checklist-add input{flex:1;min-width:0;padding:.7rem;border:1px solid var(--border);border-radius:.45rem;font:inherit}
+.checklist-tools{display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem}
+.checklist-tools .inline{display:flex;gap:.5rem}
+.checklist-tools .inline select,.checklist-tools .inline input{flex:1;min-width:0;padding:.55rem;border:1px solid var(--border);border-radius:.45rem;font:inherit;background:#fff}
+@media(min-width:640px){.checklist-tools{flex-direction:row;flex-wrap:wrap}.checklist-tools .inline{flex:1 1 260px}}
