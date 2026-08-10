@@ -73,6 +73,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const nav = [
     { to: "/planning", label: "Planning", icon: CalendarDays, show: true },
+    { to: "/taken", label: "Taken", icon: ListChecks, show: true },
     { to: "/overzicht", label: "Overzicht", icon: ClipboardList, show: isStaff(me?.role) },
     { to: "/notifications", label: "Meldingen", icon: Bell, show: true, badge: unread },
 
