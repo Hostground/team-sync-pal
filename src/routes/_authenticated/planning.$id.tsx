@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { respondActivity, getActivityAuditLog } from "@/lib/planning.functions";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
+import { ChecklistPanel } from "@/components/ChecklistPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
