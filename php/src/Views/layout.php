@@ -20,10 +20,12 @@ if ($user) {
   <a href="/planning" class="brand"><?= View::e(\App\Config::get('app.name','Planning')) ?></a>
   <nav>
     <a href="/planning">Planning</a>
+    <a href="/taken">Taken</a>
     <?php if (Auth::isStaff()): ?>
       <a href="/planning/new">Nieuw</a>
       <a href="/overzicht">Overzicht</a>
       <a href="/templates">Sjablonen</a>
+      <a href="/checklist-templates">Checklists</a>
     <?php endif; ?>
     <a href="/notifications">Meldingen<?php if ($unread): ?> <span class="badge"><?= $unread ?></span><?php endif; ?></a>
     <?php if (Auth::isAdmin()): ?>
