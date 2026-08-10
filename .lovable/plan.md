@@ -1,69 +1,50 @@
+# Live takenlijst (checklists)
 
-## Doel
+Mobiel-eerst takenlijst die live meeloopt: per activiteit én een eigen persoonlijke lijst. Taken zijn opnieuw te gebruiken via checklist-sjablonen én door de lijst van een eerdere activiteit te kopiëren.
 
-1. Een uitgebreide, Nederlandstalige **stap-voor-stap cPanel installatiegids** toevoegen aan het project.
-2. De volledige `php/` map inpakken tot een **downloadbare ZIP** en die als artifact leveren zodat je hem direct kunt downloaden. Daarnaast wordt de ZIP ook in het project bewaard zodat hij mee gesynct wordt naar Git.
+## Wat de gebruiker krijgt
 
-## Wat wordt aangemaakt / gewijzigd
+**Op een activiteit (`/planning/:id`)**
+- Blok "Taken" met voortgang (bv. "3/7 afgerond") en een voortgangsbalk.
+- Grote tikvriendelijke rijen: tik op de rij = afvinken/afvinken ongedaan maken.
+- Snel toevoegen: één invoerveld bovenaan, Enter voegt toe en houdt focus (snel meerdere taken intikken).
+- Per taak: hernoemen en verwijderen via een klein menu; slepen niet nodig — nieuwe taken komen onderaan.
+- Toegewezen medewerker én management/admin mogen toevoegen, afvinken en verwijderen.
+- Knoppen: "Sjabloon toepassen" (kies checklist-sjabloon), "Kopieer van eerdere activiteit" (kies uit recente activiteiten), "Bewaar als sjabloon".
+- Live: afvinken door de medewerker verschijnt binnen een seconde bij management op een ander toestel, en omgekeerd.
 
-### 1. Installatiegids
-Nieuw bestand: `php/INSTALL_CPANEL.md` — gedetailleerde gids met screenshots-uitleg en commando's. Onderdelen:
+**Persoonlijke lijst (`/taken`)**
+- Eigen losse takenlijst per gebruiker, zelfde snelle invoer en afvinken.
+- Afgeronde taken schuiven naar een inklapbaar "Afgerond"-blok.
+- Zelfde sjabloon-knoppen, zodat een vaste dagroutine in één tik staat.
+- Nieuw navigatie-item "Taken" in de app-navigatie.
 
-1. **Voorbereiding**
-   - Vereisten (PHP 8.1+, MySQL/MariaDB, HTTPS, cPanel toegang, SSH/Terminal aanbevolen)
-   - Benodigde PHP-extensies checken (`pdo_mysql`, `openssl`, `mbstring`, `gmp`) via **cPanel → Select PHP Version**
-2. **Bestanden uploaden**
-   - Optie A: via **File Manager** (ZIP uploaden naar `/home/USER/`, uitpakken)
-   - Optie B: via SSH (`scp` / `git clone`)
-   - Aanbevolen doelmap: `/home/USER/planning/`
-3. **Database aanmaken**
-   - **cPanel → MySQL Databases** → database + user + koppelen (ALL PRIVILEGES)
-   - Import `config/schema.sql` via **phpMyAdmin**
-   - Optioneel `config/seed.sql`
-4. **(Sub)domein koppelen met juiste document root**
-   - **cPanel → Domains** → subdomein aanmaken (bv. `planning.jouwdomein.be`)
-   - Document root instellen op `/home/USER/planning/public` (belangrijk i.v.m. beveiliging)
-5. **Config invullen**
-   - `cp config/config.example.php config/config.php`
-   - Uitleg per veld: `app.url`, `app.secret` (32+ random), DB-gegevens, SMTP (mag leeg blijven — kan later via UI), VAPID keys, WebAuthn `rp_id`
-   - Commando's om `app.secret` en VAPID keys te genereren
-6. **Composer dependencies**
-   - Via **cPanel → Terminal**: `cd ~/planning && composer install --no-dev`
-   - Alternatief als Composer ontbreekt: `curl -sS https://getcomposer.org/installer | php`
-7. **HTTPS activeren**
-   - **cPanel → SSL/TLS Status** → AutoSSL uitvoeren (verplicht voor WebAuthn + Web Push)
-8. **Eerste keer opstarten**
-   - `https://planning.jouwdomein.be/register` → eerste account = admin
-   - Daarna in **Beheer → SMTP** de mailserver invullen en een testmail sturen
-   - **Beheer → Gebruikers** om rollen toe te kennen
-   - **Beheer → Types** om activiteitstypes aan te maken
-9. **Cronjobs instellen**
-   - **cPanel → Cron Jobs** → twee entries met exact pad naar `php`-binary:
-     - `*/5 * * * * /usr/local/bin/php /home/USER/planning/cron/auto_escalate.php`
-     - `*/15 * * * * /usr/local/bin/php /home/USER/planning/cron/send_reminders.php`
-   - Hoe het juiste PHP-pad vinden (`which php` of cPanel PHP-version pad)
-10. **Beveiliging & aanbevelingen**
-    - `config/config.php` buiten document root (staat er al)
-    - File permissions (644 files / 755 dirs)
-    - Backup: cPanel → Backup Wizard
-11. **Veelvoorkomende problemen (Troubleshooting)**
-    - 500 error → error log in cPanel
-    - "class not found" → composer install vergeten
-    - WebAuthn werkt niet → HTTPS/rp_id check
-    - Push notificaties werken niet → VAPID keys ontbreken
-    - Mails komen niet aan → SMTP-test knop + spam/SPF/DKIM
+**Sjablonen**
+- Beheerpagina-uitbreiding: checklist-sjablonen aanmaken/bewerken/verwijderen (naam + lijst met taken).
+- Medewerkers kunnen bestaande sjablonen toepassen; management/admin beheert ze.
 
-`php/README.md` krijgt een korte verwijzing naar `INSTALL_CPANEL.md`.
+## Mobiel gedrag
 
-### 2. Downloadbare ZIP
+- Rijen minimaal 44px hoog, grote checkbox-hitzone, geen hover-afhankelijke acties.
+- Invoerveld blijft bereikbaar boven het toetsenbord; sticky invoer onderaan de lijst op smalle schermen.
+- Afvinken is optimistisch: de UI reageert direct, ook bij trage verbinding, en rolt terug bij een fout.
 
-- Een script in de sandbox pakt de volledige `php/` map in tot `planning-php.zip` (exclusief `vendor/` en `config/config.php` als die zouden bestaan).
-- De ZIP wordt op **twee** plekken bewaard:
-  - `/mnt/documents/planning-php.zip` — direct downloadbaar via het `<presentation-artifact>` blok in de reply.
-  - `php-download/planning-php.zip` in het project — zodat de ZIP mee gaat in Git-sync en later opnieuw te downloaden is via de Code Editor.
-- ZIP bevat ook `INSTALL_CPANEL.md` in de root van het archief.
+## Technische aanpak
 
-## Buiten scope
+Database (migratie, inclusief GRANTs + RLS):
+- `checklist_items`: `activity_id` (nullable), `owner_id` (nullable, voor persoonlijke lijst), `title`, `done`, `done_at`, `done_by`, `position`, timestamps + `set_updated_at` trigger.
+- `checklist_templates` + `checklist_template_items`: naam, titel, positie.
+- RLS: item van een activiteit is leesbaar/wijzigbaar door de assignee, de creator en admin/management (via `has_role`); persoonlijk item alleen door `owner_id = auth.uid()`. Sjablonen leesbaar voor authenticated, beheer door admin/management.
+- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE public.checklist_items`.
 
-- Geen wijzigingen aan de Lovable/React app.
-- Geen wijzigingen aan schema, controllers of businesslogica — enkel documentatie + verpakking.
+App:
+- Nieuw `src/lib/checklist.functions.ts` (server fns met `requireSupabaseAuth`): toevoegen, hernoemen, togglen, verwijderen, sjabloon toepassen, kopiëren van activiteit, bewaren als sjabloon.
+- Nieuwe component `src/components/ChecklistPanel.tsx` (herbruikbaar voor activiteit en persoonlijke lijst) met TanStack Query + optimistische mutaties.
+- Realtime-subscriptie in één `useEffect` met opruimen bij unmount; invalidatie van de betreffende query-key.
+- Nieuwe route `src/routes/_authenticated/taken.index.tsx` met eigen `head()` metadata; navigatie-item in `AppShell`.
+
+PHP-versie (`php/`), zelfde functionaliteit:
+- Schema-uitbreiding in `php/config/schema.sql` voor dezelfde drie tabellen.
+- Nieuwe `ChecklistController` met endpoints voor toevoegen/togglen/verwijderen/sjabloon toepassen, plus JSON-endpoints voor de mobiele UI.
+- Taken-blok in `php/src/Views/planning/show.php` en een nieuwe persoonlijke takenpagina; "live" via korte polling (elke ~5s) in `php/public/assets/app.js`, want cPanel heeft geen websockets.
+- ZIP-download in `php-download/planning-php.zip` verversen.
