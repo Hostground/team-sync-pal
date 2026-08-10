@@ -162,6 +162,10 @@ function ActivityDetail() {
         </CardContent>
       </Card>
 
+      <ChecklistPanel activityId={id} />
+
+
+
       {canRespond && (
         <Card>
           <CardHeader>
