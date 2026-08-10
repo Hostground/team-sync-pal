@@ -125,6 +125,10 @@ function TemplatesPage() {
           </Card>
         ))}
       </div>
+
+      <h2 className="pt-4 text-xl font-bold">Checklist-sjablonen</h2>
+      <ChecklistTemplatesManager />
     </div>
+
   );
 }
