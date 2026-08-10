@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ClipboardList,
+  ListChecks,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
