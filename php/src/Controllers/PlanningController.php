@@ -105,7 +105,18 @@ class PlanningController {
                  LEFT JOIN users u ON u.id=n.user_id
                  WHERE n.activity_id = ? ORDER BY d.created_at DESC", [$p['id']]);
         }
-        View::render('planning/show', ['title'=>$a['title'], 'a'=>$a, 'audit'=>$audit, 'deliveries'=>$deliveries]);
+
+        $checklistTemplates = Db::all('SELECT id, name FROM checklist_templates ORDER BY name');
+        $copyOptions = Auth::isStaff()
+            ? Db::all("SELECT DISTINCT a.id, a.title FROM activities a
+                       JOIN checklist_items c ON c.activity_id = a.id
+                       WHERE a.id <> ? ORDER BY a.start_at DESC LIMIT 25", [$p['id']])
+            : [];
+
+        View::render('planning/show', [
+            'title' => $a['title'], 'a' => $a, 'audit' => $audit, 'deliveries' => $deliveries,
+            'checklistTemplates' => $checklistTemplates, 'copyOptions' => $copyOptions,
+        ]);
     }
 
     public function respond(array $p): void {

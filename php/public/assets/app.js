@@ -47,3 +47,118 @@ document.getElementById('webauthn-login')?.addEventListener('click', async () =>
   if (rr.ok) { const j = await rr.json(); location.href = j.redirect || '/planning'; }
   else alert('Kon niet aanmelden.');
 });
+
+// ===== Live takenlijst =====
+(function () {
+  const root = document.querySelector('[data-checklist]');
+  if (!root) return;
+  const activityId = root.dataset.activity || '';
+  const list = root.querySelector('[data-checklist-list]');
+  const progress = root.querySelector('[data-checklist-progress]');
+  const scopeQS = activityId ? '?activity_id=' + encodeURIComponent(activityId) : '';
+
+  const post = (url, data) => {
+    const body = new URLSearchParams(data || {});
+    if (activityId) body.set('activity_id', activityId);
+    body.set('_csrf', window.CSRF_TOKEN);
+    return fetch(url, { method: 'POST', headers: { 'X-CSRF': window.CSRF_TOKEN }, body });
+  };
+
+  let lastSignature = '';
+  function render(data) {
+    const sig = JSON.stringify(data.items.map(i => [i.id, i.title, i.done]));
+    if (sig === lastSignature) return;
+    lastSignature = sig;
+    progress.textContent = data.done + '/' + data.total;
+    list.innerHTML = '';
+    if (!data.items.length) {
+      const li = document.createElement('li');
+      li.className = 'muted';
+      li.textContent = 'Nog geen taken.';
+      list.appendChild(li);
+      return;
+    }
+    data.items.forEach(function (it) {
+      const li = document.createElement('li');
+      li.className = Number(it.done) ? 'done' : '';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!Number(it.done);
+      cb.addEventListener('change', async function () {
+        li.classList.toggle('done', cb.checked);
+        await post('/checklist/items/' + it.id + '/toggle');
+        refresh();
+      });
+      const span = document.createElement('span');
+      span.className = 'task-title';
+      span.textContent = it.title;
+      span.addEventListener('dblclick', async function () {
+        const t = prompt('Taak aanpassen', it.title);
+        if (t && t.trim()) { await post('/checklist/items/' + it.id + '/rename', { title: t.trim() }); refresh(); }
+      });
+      const del = document.createElement('button');
+      del.className = 'task-del';
+      del.type = 'button';
+      del.setAttribute('aria-label', 'Verwijderen');
+      del.textContent = '\u00d7';
+      del.addEventListener('click', async function () {
+        if (!confirm('Taak verwijderen?')) return;
+        await post('/checklist/items/' + it.id + '/delete');
+        refresh();
+      });
+      li.append(cb, span, del);
+      list.appendChild(li);
+    });
+  }
+
+  async function refresh() {
+    try {
+      const r = await fetch('/checklist/items' + scopeQS, { headers: { 'Accept': 'application/json' } });
+      if (r.ok) render(await r.json());
+    } catch (e) { /* offline: stil negeren */ }
+  }
+
+  root.querySelector('[data-checklist-add]')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const input = e.target.querySelector('input[name=title]');
+    const title = input.value.trim();
+    if (!title) return;
+    input.value = '';
+    await post('/checklist/items', { title: title });
+    refresh();
+  });
+
+  root.querySelector('[data-checklist-apply]')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const sel = e.target.querySelector('select');
+    if (!sel.value) return;
+    await post('/checklist/apply-template', { template_id: sel.value });
+    sel.value = '';
+    refresh();
+  });
+
+  root.querySelector('[data-checklist-copy]')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const sel = e.target.querySelector('select');
+    if (!sel.value) return;
+    await post('/checklist/copy-from', { from_activity_id: sel.value });
+    sel.value = '';
+    refresh();
+  });
+
+  root.querySelector('[data-checklist-save-template]')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const input = e.target.querySelector('input[name=name]');
+    if (!input.value.trim()) return;
+    const r = await post('/checklist/save-template', { name: input.value.trim() });
+    input.value = '';
+    alert(r.ok ? 'Sjabloon bewaard.' : 'Bewaren mislukt.');
+  });
+
+  refresh();
+  let timer = setInterval(refresh, 5000);
+  document.addEventListener('visibilitychange', function () {
+    clearInterval(timer);
+    if (!document.hidden) { refresh(); timer = setInterval(refresh, 5000); }
+  });
+})();

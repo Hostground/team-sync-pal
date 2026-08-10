@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates.index'
+import { Route as AuthenticatedTakenIndexRouteImport } from './routes/_authenticated/taken.index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedPlanningIndexRouteImport } from './routes/_authenticated/planning.index'
 import { Route as AuthenticatedOverzichtIndexRouteImport } from './routes/_authenticated/overzicht.index'
@@ -43,6 +44,11 @@ const AuthenticatedTemplatesIndexRoute =
     path: '/templates/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTakenIndexRoute = AuthenticatedTakenIndexRouteImport.update({
+  id: '/taken/',
+  path: '/taken/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/settings/',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/overzicht/': typeof AuthenticatedOverzichtIndexRoute
   '/planning/': typeof AuthenticatedPlanningIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/taken/': typeof AuthenticatedTakenIndexRoute
   '/templates/': typeof AuthenticatedTemplatesIndexRoute
   '/api/public/hooks/auto-escalate': typeof ApiPublicHooksAutoEscalateRoute
 }
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/overzicht': typeof AuthenticatedOverzichtIndexRoute
   '/planning': typeof AuthenticatedPlanningIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/taken': typeof AuthenticatedTakenIndexRoute
   '/templates': typeof AuthenticatedTemplatesIndexRoute
   '/api/public/hooks/auto-escalate': typeof ApiPublicHooksAutoEscalateRoute
 }
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/_authenticated/overzicht/': typeof AuthenticatedOverzichtIndexRoute
   '/_authenticated/planning/': typeof AuthenticatedPlanningIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/taken/': typeof AuthenticatedTakenIndexRoute
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
   '/api/public/hooks/auto-escalate': typeof ApiPublicHooksAutoEscalateRoute
 }
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/overzicht/'
     | '/planning/'
     | '/settings/'
+    | '/taken/'
     | '/templates/'
     | '/api/public/hooks/auto-escalate'
   fileRoutesByTo: FileRoutesByTo
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/overzicht'
     | '/planning'
     | '/settings'
+    | '/taken'
     | '/templates'
     | '/api/public/hooks/auto-escalate'
   id:
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/_authenticated/overzicht/'
     | '/_authenticated/planning/'
     | '/_authenticated/settings/'
+    | '/_authenticated/taken/'
     | '/_authenticated/templates/'
     | '/api/public/hooks/auto-escalate'
   fileRoutesById: FileRoutesById
@@ -220,6 +232,13 @@ declare module '@tanstack/react-router' {
       path: '/templates'
       fullPath: '/templates/'
       preLoaderRoute: typeof AuthenticatedTemplatesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/taken/': {
+      id: '/_authenticated/taken/'
+      path: '/taken'
+      fullPath: '/taken/'
+      preLoaderRoute: typeof AuthenticatedTakenIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/': {
@@ -297,6 +316,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOverzichtIndexRoute: typeof AuthenticatedOverzichtIndexRoute
   AuthenticatedPlanningIndexRoute: typeof AuthenticatedPlanningIndexRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
+  AuthenticatedTakenIndexRoute: typeof AuthenticatedTakenIndexRoute
   AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
 }
 
@@ -309,6 +329,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOverzichtIndexRoute: AuthenticatedOverzichtIndexRoute,
   AuthenticatedPlanningIndexRoute: AuthenticatedPlanningIndexRoute,
   AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
+  AuthenticatedTakenIndexRoute: AuthenticatedTakenIndexRoute,
   AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
 }
 
@@ -324,13 +345,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

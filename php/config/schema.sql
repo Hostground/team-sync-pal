@@ -166,3 +166,46 @@ INSERT INTO settings(`key`,`value`) VALUES
 ON DUPLICATE KEY UPDATE `value`=VALUES(`value`);
 
 SET FOREIGN_KEY_CHECKS=1;
+
+-- =============================
+-- Takenlijsten (checklists)
+-- =============================
+SET FOREIGN_KEY_CHECKS=0;
+
+CREATE TABLE IF NOT EXISTS checklist_items (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  activity_id CHAR(36) NULL,
+  owner_id CHAR(36) NULL,
+  title VARCHAR(255) NOT NULL,
+  done TINYINT(1) NOT NULL DEFAULT 0,
+  done_at DATETIME NULL,
+  done_by CHAR(36) NULL,
+  position INT NOT NULL DEFAULT 0,
+  created_by CHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_activity (activity_id, position),
+  KEY idx_owner (owner_id, position),
+  CONSTRAINT fk_cli_act   FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cli_owner FOREIGN KEY (owner_id)    REFERENCES users(id)      ON DELETE CASCADE,
+  CONSTRAINT fk_cli_by    FOREIGN KEY (created_by)  REFERENCES users(id)      ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS checklist_templates (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  created_by CHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_clt_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS checklist_template_items (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  template_id CHAR(36) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  position INT NOT NULL DEFAULT 0,
+  KEY idx_tpl (template_id, position),
+  CONSTRAINT fk_clti_tpl FOREIGN KEY (template_id) REFERENCES checklist_templates(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS=1;

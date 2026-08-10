@@ -72,4 +72,18 @@ $router->get('/admin/smtp',        [\App\Controllers\AdminController::class, 'sm
 $router->post('/admin/smtp',       [\App\Controllers\AdminController::class, 'saveSmtp'], 'admin');
 $router->post('/admin/smtp/test',  [\App\Controllers\AdminController::class, 'testSmtp'], 'admin');
 
+// Takenlijsten (checklists)
+$router->get('/taken',                    [\App\Controllers\ChecklistController::class, 'myTasks'], 'auth');
+$router->get('/checklist/items',          [\App\Controllers\ChecklistController::class, 'list'], 'auth');
+$router->post('/checklist/items',         [\App\Controllers\ChecklistController::class, 'add'], 'auth');
+$router->post('/checklist/items/{id}/toggle', [\App\Controllers\ChecklistController::class, 'toggle'], 'auth');
+$router->post('/checklist/items/{id}/rename', [\App\Controllers\ChecklistController::class, 'rename'], 'auth');
+$router->post('/checklist/items/{id}/delete', [\App\Controllers\ChecklistController::class, 'delete'], 'auth');
+$router->post('/checklist/apply-template', [\App\Controllers\ChecklistController::class, 'applyTemplate'], 'auth');
+$router->post('/checklist/copy-from',      [\App\Controllers\ChecklistController::class, 'copyFrom'], 'auth');
+$router->post('/checklist/save-template',  [\App\Controllers\ChecklistController::class, 'saveAsTemplate'], 'staff');
+$router->get('/checklist-templates',       [\App\Controllers\ChecklistController::class, 'templates'], 'staff');
+$router->post('/checklist-templates',      [\App\Controllers\ChecklistController::class, 'storeTemplate'], 'staff');
+$router->post('/checklist-templates/{id}/delete', [\App\Controllers\ChecklistController::class, 'deleteTemplate'], 'staff');
+
 $router->dispatch();

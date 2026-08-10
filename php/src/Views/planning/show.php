@@ -24,6 +24,12 @@
 </form>
 <?php endif; ?>
 
+<?php
+  $checklistScope = ['activity_id' => $a['id']];
+  $checklistTemplates = $checklistTemplates ?? [];
+  include __DIR__ . '/../partials/checklist.php';
+?>
+
 <h2>Geschiedenis</h2>
 <ul class="list">
 <?php foreach ($audit as $l): ?>
