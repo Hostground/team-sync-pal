@@ -213,7 +213,26 @@ function OverviewPage() {
         </CardContent>
       </Card>
 
+      <Tabs value={mode} onValueChange={(v) => setMode(v as "calendar" | "list")}>
+        <TabsList>
+          <TabsTrigger value="calendar">Kalender</TabsTrigger>
+          <TabsTrigger value="list">Lijst</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="calendar" className="mt-3">
+          <PlanningCalendar
+            view={view}
+            anchor={anchor}
+            events={events}
+            isLoading={isLoading}
+            onViewChange={setView}
+            onAnchorChange={setAnchor}
+          />
+        </TabsContent>
+
+        <TabsContent value="list" className="mt-3 space-y-2">
       {isLoading ? (
+
         <p className="text-sm text-muted-foreground">Laden…</p>
       ) : rows.length === 0 ? (
         <Card>
