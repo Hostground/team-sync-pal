@@ -23,13 +23,21 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, ChevronDown, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { PlanningCalendar } from "@/components/planning-calendar/PlanningCalendar";
+import {
+  type CalEvent,
+  type CalendarView,
+  visibleRange,
+} from "@/components/planning-calendar/calendar-utils";
 
 export const Route = createFileRoute("/_authenticated/overzicht/")({
   component: OverviewPage,
 });
+
 
 const statusMeta: Record<
   string,
