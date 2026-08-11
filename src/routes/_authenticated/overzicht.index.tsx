@@ -23,13 +23,21 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, ChevronDown, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { PlanningCalendar } from "@/components/planning-calendar/PlanningCalendar";
+import {
+  type CalEvent,
+  type CalendarView,
+  visibleRange,
+} from "@/components/planning-calendar/calendar-utils";
 
 export const Route = createFileRoute("/_authenticated/overzicht/")({
   component: OverviewPage,
 });
+
 
 const statusMeta: Record<
   string,
@@ -54,6 +62,10 @@ function OverviewPage() {
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [mode, setMode] = useState<"calendar" | "list">("calendar");
+  const [view, setView] = useState<CalendarView>("week");
+  const [anchor, setAnchor] = useState<Date>(() => new Date());
+
 
   const { data: employees = [] } = useQuery({
     queryKey: ["overview-employees"],
@@ -71,23 +83,47 @@ function OverviewPage() {
     },
   });
 
-  const filters = useMemo(
-    () => ({
+  const filters = useMemo(() => {
+    const range =
+      mode === "calendar"
+        ? visibleRange(view, anchor)
+        : {
+            from: from ? new Date(from) : undefined,
+            to: to ? new Date(to + "T23:59:59") : undefined,
+          };
+    return {
       status: status !== ALL ? (status as any) : undefined,
       assignee_id: assigneeId !== ALL ? assigneeId : undefined,
       type_id: typeId !== ALL ? typeId : undefined,
-      from: from ? new Date(from).toISOString() : undefined,
-      to: to ? new Date(to + "T23:59:59").toISOString() : undefined,
+      from: range.from ? range.from.toISOString() : undefined,
+      to: range.to ? range.to.toISOString() : undefined,
       only_unread: onlyUnread || undefined,
-    }),
-    [status, assigneeId, typeId, from, to, onlyUnread],
-  );
+    };
+  }, [status, assigneeId, typeId, from, to, onlyUnread, mode, view, anchor]);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["overview", filters],
     enabled: isStaff(me?.role),
     queryFn: () => fetchOverview({ data: filters }),
   });
+
+  const events: CalEvent[] = useMemo(
+    () =>
+      (rows as any[]).map((a) => ({
+        id: a.id,
+        title: a.title,
+        start: new Date(a.start_at),
+        end: new Date(a.end_at),
+        status: a.status,
+        typeName: a.activity_types?.name ?? null,
+        typeColor: a.activity_types?.color ?? null,
+        assignee: a.assignee?.full_name ?? a.assignee?.email ?? null,
+        location: a.location ?? null,
+        customer: a.customer ?? null,
+      })),
+    [rows],
+  );
+
 
   if (!me) return null;
   if (!isStaff(me.role)) {
@@ -156,14 +192,19 @@ function OverviewPage() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label className="text-xs">Van</Label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Tot</Label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          </div>
+          {mode === "list" && (
+            <>
+              <div>
+                <Label className="text-xs">Van</Label>
+                <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Tot</Label>
+                <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+              </div>
+            </>
+          )}
+
           <div className="flex items-end gap-2">
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
@@ -177,7 +218,26 @@ function OverviewPage() {
         </CardContent>
       </Card>
 
+      <Tabs value={mode} onValueChange={(v) => setMode(v as "calendar" | "list")}>
+        <TabsList>
+          <TabsTrigger value="calendar">Kalender</TabsTrigger>
+          <TabsTrigger value="list">Lijst</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="calendar" className="mt-3">
+          <PlanningCalendar
+            view={view}
+            anchor={anchor}
+            events={events}
+            isLoading={isLoading}
+            onViewChange={setView}
+            onAnchorChange={setAnchor}
+          />
+        </TabsContent>
+
+        <TabsContent value="list" className="mt-3 space-y-2">
       {isLoading ? (
+
         <p className="text-sm text-muted-foreground">Laden…</p>
       ) : rows.length === 0 ? (
         <Card>
@@ -312,6 +372,9 @@ function OverviewPage() {
           })}
         </div>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
+
   );
 }
