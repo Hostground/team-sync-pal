@@ -83,23 +83,47 @@ function OverviewPage() {
     },
   });
 
-  const filters = useMemo(
-    () => ({
+  const filters = useMemo(() => {
+    const range =
+      mode === "calendar"
+        ? visibleRange(view, anchor)
+        : {
+            from: from ? new Date(from) : undefined,
+            to: to ? new Date(to + "T23:59:59") : undefined,
+          };
+    return {
       status: status !== ALL ? (status as any) : undefined,
       assignee_id: assigneeId !== ALL ? assigneeId : undefined,
       type_id: typeId !== ALL ? typeId : undefined,
-      from: from ? new Date(from).toISOString() : undefined,
-      to: to ? new Date(to + "T23:59:59").toISOString() : undefined,
+      from: range.from ? range.from.toISOString() : undefined,
+      to: range.to ? range.to.toISOString() : undefined,
       only_unread: onlyUnread || undefined,
-    }),
-    [status, assigneeId, typeId, from, to, onlyUnread],
-  );
+    };
+  }, [status, assigneeId, typeId, from, to, onlyUnread, mode, view, anchor]);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["overview", filters],
     enabled: isStaff(me?.role),
     queryFn: () => fetchOverview({ data: filters }),
   });
+
+  const events: CalEvent[] = useMemo(
+    () =>
+      (rows as any[]).map((a) => ({
+        id: a.id,
+        title: a.title,
+        start: new Date(a.start_at),
+        end: new Date(a.end_at),
+        status: a.status,
+        typeName: a.activity_types?.name ?? null,
+        typeColor: a.activity_types?.color ?? null,
+        assignee: a.assignee?.full_name ?? a.assignee?.email ?? null,
+        location: a.location ?? null,
+        customer: a.customer ?? null,
+      })),
+    [rows],
+  );
+
 
   if (!me) return null;
   if (!isStaff(me.role)) {
