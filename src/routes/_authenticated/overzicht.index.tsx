@@ -348,6 +348,9 @@ function OverviewPage() {
           })}
         </div>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
+
   );
 }
