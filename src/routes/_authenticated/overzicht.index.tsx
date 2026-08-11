@@ -192,14 +192,19 @@ function OverviewPage() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label className="text-xs">Van</Label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Tot</Label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          </div>
+          {mode === "list" && (
+            <>
+              <div>
+                <Label className="text-xs">Van</Label>
+                <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Tot</Label>
+                <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+              </div>
+            </>
+          )}
+
           <div className="flex items-end gap-2">
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
