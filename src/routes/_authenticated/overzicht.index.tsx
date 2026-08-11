@@ -62,6 +62,10 @@ function OverviewPage() {
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [mode, setMode] = useState<"calendar" | "list">("calendar");
+  const [view, setView] = useState<CalendarView>("week");
+  const [anchor, setAnchor] = useState<Date>(() => new Date());
+
 
   const { data: employees = [] } = useQuery({
     queryKey: ["overview-employees"],
