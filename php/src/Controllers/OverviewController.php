@@ -43,9 +43,31 @@ class OverviewController {
         $employees = Db::all("SELECT DISTINCT u.id, u.full_name FROM users u JOIN user_roles r ON r.user_id=u.id ORDER BY u.full_name");
         $types = Db::all('SELECT id,name FROM activity_types ORDER BY name');
 
+        // Agenda-events: zelfde filters (behalve datum), ruim bereik rond nu
+        $cw = '1=1'; $cp = [];
+        if (!empty($_GET['status']))   { $cw .= ' AND a.status = ?';      $cp[] = $_GET['status']; }
+        if (!empty($_GET['assignee'])) { $cw .= ' AND a.assignee_id = ?'; $cp[] = $_GET['assignee']; }
+        if (!empty($_GET['type']))     { $cw .= ' AND a.type_id = ?';     $cp[] = $_GET['type']; }
+        $events = Db::all(
+            "SELECT a.id, a.title, a.start_at, a.end_at, a.status, a.location, a.customer,
+                    u.full_name AS assignee_name, t.name AS type_name, t.color AS type_color
+             FROM activities a
+             LEFT JOIN users u ON u.id=a.assignee_id
+             LEFT JOIN activity_types t ON t.id=a.type_id
+             WHERE $cw AND a.start_at >= DATE_SUB(NOW(), INTERVAL 18 MONTH)
+                       AND a.start_at <= DATE_ADD(NOW(), INTERVAL 18 MONTH)
+             ORDER BY a.start_at LIMIT 3000", $cp);
+
+        $calendar = array_map(fn($r) => [
+            'id' => $r['id'], 'title' => $r['title'], 'start' => $r['start_at'], 'end' => $r['end_at'],
+            'status' => $r['status'], 'type' => $r['type_name'], 'color' => $r['type_color'],
+            'assignee' => $r['assignee_name'], 'location' => $r['location'], 'customer' => $r['customer'],
+        ], $events);
+
         View::render('overzicht/index', [
             'title'=>'Overzicht','rows'=>$rows,'summary'=>$summary,
-            'employees'=>$employees,'types'=>$types,'filters'=>$_GET,
+            'employees'=>$employees,'types'=>$types,'filters'=>$_GET,'calendar'=>$calendar,
         ]);
     }
 }
+
