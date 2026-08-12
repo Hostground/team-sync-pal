@@ -142,3 +142,15 @@
     color: var(--color-foreground);
   }
 }
+
+/* Info-TV (lobby display) background motion */
+@keyframes display-kenburns-a {
+  0% { transform: scale(1.04) translate3d(0, 0, 0); }
+  100% { transform: scale(1.16) translate3d(-1.5%, -1.5%, 0); }
+}
+@keyframes display-kenburns-b {
+  0% { transform: scale(1.16) translate3d(1.5%, 1%, 0); }
+  100% { transform: scale(1.04) translate3d(0, 0, 0); }
+}
+.display-kenburns-a { animation: display-kenburns-a 26s ease-in-out infinite alternate; }
+.display-kenburns-b { animation: display-kenburns-b 26s ease-in-out infinite alternate; }

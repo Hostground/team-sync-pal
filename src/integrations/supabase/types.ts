@@ -329,6 +329,136 @@ export type Database = {
         }
         Relationships: []
       }
+      display_slides: {
+        Row: {
+          active: boolean
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          media: Json
+          position: number
+          seconds: number | null
+          template_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          media?: Json
+          position?: number
+          seconds?: number | null
+          template_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          media?: Json
+          position?: number
+          seconds?: number | null
+          template_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "display_slides_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "display_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      display_templates: {
+        Row: {
+          clock_position: string
+          created_at: string
+          created_by: string | null
+          default_slide_seconds: number
+          id: string
+          name: string
+          show_clock: boolean
+          theme: Json
+          updated_at: string
+        }
+        Insert: {
+          clock_position?: string
+          created_at?: string
+          created_by?: string | null
+          default_slide_seconds?: number
+          id?: string
+          name: string
+          show_clock?: boolean
+          theme?: Json
+          updated_at?: string
+        }
+        Update: {
+          clock_position?: string
+          created_at?: string
+          created_by?: string | null
+          default_slide_seconds?: number
+          id?: string
+          name?: string
+          show_clock?: boolean
+          theme?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      displays: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          template_id: string | null
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          template_id?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          template_id?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "displays_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "display_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_deliveries: {
         Row: {
           channel: Database["public"]["Enums"]["notif_channel"]

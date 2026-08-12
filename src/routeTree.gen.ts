@@ -12,12 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DisplayCodeRouteImport } from './routes/display.$code'
 import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates.index'
 import { Route as AuthenticatedTakenIndexRouteImport } from './routes/_authenticated/taken.index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedPlanningIndexRouteImport } from './routes/_authenticated/planning.index'
 import { Route as AuthenticatedOverzichtIndexRouteImport } from './routes/_authenticated/overzicht.index'
 import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
+import { Route as AuthenticatedDisplayIndexRouteImport } from './routes/_authenticated/display.index'
 import { Route as AuthenticatedPlanningNewRouteImport } from './routes/_authenticated/planning.new'
 import { Route as AuthenticatedPlanningIdRouteImport } from './routes/_authenticated/planning.$id'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
@@ -36,6 +38,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisplayCodeRoute = DisplayCodeRouteImport.update({
+  id: '/display/$code',
+  path: '/display/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTemplatesIndexRoute =
@@ -73,6 +80,12 @@ const AuthenticatedNotificationsIndexRoute =
     path: '/notifications/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDisplayIndexRoute =
+  AuthenticatedDisplayIndexRouteImport.update({
+    id: '/display/',
+    path: '/display/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPlanningNewRoute =
   AuthenticatedPlanningNewRouteImport.update({
     id: '/planning/new',
@@ -104,10 +117,12 @@ const ApiPublicHooksAutoEscalateRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/display/$code': typeof DisplayCodeRoute
   '/admin/types': typeof AuthenticatedAdminTypesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
+  '/display/': typeof AuthenticatedDisplayIndexRoute
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/overzicht/': typeof AuthenticatedOverzichtIndexRoute
   '/planning/': typeof AuthenticatedPlanningIndexRoute
@@ -119,10 +134,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/display/$code': typeof DisplayCodeRoute
   '/admin/types': typeof AuthenticatedAdminTypesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/planning/new': typeof AuthenticatedPlanningNewRoute
+  '/display': typeof AuthenticatedDisplayIndexRoute
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/overzicht': typeof AuthenticatedOverzichtIndexRoute
   '/planning': typeof AuthenticatedPlanningIndexRoute
@@ -136,10 +153,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/display/$code': typeof DisplayCodeRoute
   '/_authenticated/admin/types': typeof AuthenticatedAdminTypesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/planning/$id': typeof AuthenticatedPlanningIdRoute
   '/_authenticated/planning/new': typeof AuthenticatedPlanningNewRoute
+  '/_authenticated/display/': typeof AuthenticatedDisplayIndexRoute
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/overzicht/': typeof AuthenticatedOverzichtIndexRoute
   '/_authenticated/planning/': typeof AuthenticatedPlanningIndexRoute
@@ -153,10 +172,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/display/$code'
     | '/admin/types'
     | '/admin/users'
     | '/planning/$id'
     | '/planning/new'
+    | '/display/'
     | '/notifications/'
     | '/overzicht/'
     | '/planning/'
@@ -168,10 +189,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/display/$code'
     | '/admin/types'
     | '/admin/users'
     | '/planning/$id'
     | '/planning/new'
+    | '/display'
     | '/notifications'
     | '/overzicht'
     | '/planning'
@@ -184,10 +207,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/display/$code'
     | '/_authenticated/admin/types'
     | '/_authenticated/admin/users'
     | '/_authenticated/planning/$id'
     | '/_authenticated/planning/new'
+    | '/_authenticated/display/'
     | '/_authenticated/notifications/'
     | '/_authenticated/overzicht/'
     | '/_authenticated/planning/'
@@ -201,6 +226,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DisplayCodeRoute: typeof DisplayCodeRoute
   ApiPublicHooksAutoEscalateRoute: typeof ApiPublicHooksAutoEscalateRoute
 }
 
@@ -225,6 +251,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/display/$code': {
+      id: '/display/$code'
+      path: '/display/$code'
+      fullPath: '/display/$code'
+      preLoaderRoute: typeof DisplayCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/templates/': {
@@ -267,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications/'
       preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/display/': {
+      id: '/_authenticated/display/'
+      path: '/display'
+      fullPath: '/display/'
+      preLoaderRoute: typeof AuthenticatedDisplayIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/planning/new': {
@@ -312,6 +352,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedPlanningIdRoute: typeof AuthenticatedPlanningIdRoute
   AuthenticatedPlanningNewRoute: typeof AuthenticatedPlanningNewRoute
+  AuthenticatedDisplayIndexRoute: typeof AuthenticatedDisplayIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedOverzichtIndexRoute: typeof AuthenticatedOverzichtIndexRoute
   AuthenticatedPlanningIndexRoute: typeof AuthenticatedPlanningIndexRoute
@@ -325,6 +366,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedPlanningIdRoute: AuthenticatedPlanningIdRoute,
   AuthenticatedPlanningNewRoute: AuthenticatedPlanningNewRoute,
+  AuthenticatedDisplayIndexRoute: AuthenticatedDisplayIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedOverzichtIndexRoute: AuthenticatedOverzichtIndexRoute,
   AuthenticatedPlanningIndexRoute: AuthenticatedPlanningIndexRoute,
@@ -340,18 +382,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DisplayCodeRoute: DisplayCodeRoute,
   ApiPublicHooksAutoEscalateRoute: ApiPublicHooksAutoEscalateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
