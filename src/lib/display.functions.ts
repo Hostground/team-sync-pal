@@ -3,6 +3,14 @@ import { z } from "zod";
 
 const CodeSchema = z.object({ code: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/) });
 
+export type DisplayTheme = {
+  bg?: string;
+  accent?: string;
+  text?: string;
+  overlay?: number;
+  textScale?: number;
+};
+
 export type DisplaySlide = {
   id: string;
   kind: "text" | "photos" | "planning_today";
@@ -17,7 +25,7 @@ export type DisplayPayload = {
   timezone: string;
   show_clock: boolean;
   clock_position: string;
-  theme: Record<string, unknown>;
+  theme: DisplayTheme;
   slides: DisplaySlide[];
   today: { start: string; end: string; title: string; location: string | null; person: string | null }[];
 };
@@ -39,12 +47,13 @@ export const getDisplayByCode = createServerFn({ method: "GET" })
 
     if (!display || !display.active) return null;
 
-    let template: {
-      theme: Record<string, unknown>;
+    type TemplateRow = {
+      theme: DisplayTheme;
       show_clock: boolean;
       clock_position: string;
       default_slide_seconds: number;
-    } | null = null;
+    };
+    let template: TemplateRow | null = null;
     let slideRows: {
       id: string;
       kind: string;
@@ -60,7 +69,7 @@ export const getDisplayByCode = createServerFn({ method: "GET" })
         .select("theme, show_clock, clock_position, default_slide_seconds")
         .eq("id", display.template_id)
         .maybeSingle();
-      template = (t as typeof template) ?? null;
+      template = (t as TemplateRow | null) ?? null;
 
       const { data: s } = await supabaseAdmin
         .from("display_slides")
