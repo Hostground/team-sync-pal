@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DisplayCodeRouteImport } from './routes/display.$code'
 import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates.index'
 import { Route as AuthenticatedTakenIndexRouteImport } from './routes/_authenticated/taken.index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
@@ -36,6 +37,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisplayCodeRoute = DisplayCodeRouteImport.update({
+  id: '/display/$code',
+  path: '/display/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTemplatesIndexRoute =
@@ -104,6 +110,7 @@ const ApiPublicHooksAutoEscalateRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/display/$code': typeof DisplayCodeRoute
   '/admin/types': typeof AuthenticatedAdminTypesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/display/$code': typeof DisplayCodeRoute
   '/admin/types': typeof AuthenticatedAdminTypesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/planning/$id': typeof AuthenticatedPlanningIdRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/display/$code': typeof DisplayCodeRoute
   '/_authenticated/admin/types': typeof AuthenticatedAdminTypesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/planning/$id': typeof AuthenticatedPlanningIdRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/display/$code'
     | '/admin/types'
     | '/admin/users'
     | '/planning/$id'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/display/$code'
     | '/admin/types'
     | '/admin/users'
     | '/planning/$id'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/display/$code'
     | '/_authenticated/admin/types'
     | '/_authenticated/admin/users'
     | '/_authenticated/planning/$id'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DisplayCodeRoute: typeof DisplayCodeRoute
   ApiPublicHooksAutoEscalateRoute: typeof ApiPublicHooksAutoEscalateRoute
 }
 
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/display/$code': {
+      id: '/display/$code'
+      path: '/display/$code'
+      fullPath: '/display/$code'
+      preLoaderRoute: typeof DisplayCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/templates/': {
@@ -340,18 +360,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DisplayCodeRoute: DisplayCodeRoute,
   ApiPublicHooksAutoEscalateRoute: ApiPublicHooksAutoEscalateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
