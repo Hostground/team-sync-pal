@@ -24,6 +24,28 @@
   <label><input type="checkbox" name="unread_only" value="1" <?= !empty($filters['unread_only'])?'checked':'' ?>> Alleen ongelezen</label>
   <button class="btn primary">Filteren</button>
 </form>
+<div class="tabs">
+  <button type="button" data-ov-tab="calendar" class="active">Kalender</button>
+  <button type="button" data-ov-tab="list">Lijst</button>
+</div>
+
+<div data-ov-pane="calendar" data-calendar>
+  <div class="cal-toolbar">
+    <button class="btn" type="button" data-cal-today>Vandaag</button>
+    <button class="btn" type="button" data-cal-prev aria-label="Vorige">&lsaquo;</button>
+    <button class="btn" type="button" data-cal-next aria-label="Volgende">&rsaquo;</button>
+    <span class="cal-title" data-cal-title></span>
+    <span class="cal-views">
+      <button type="button" data-cal-view="day">Dag</button>
+      <button type="button" data-cal-view="week">Week</button>
+      <button type="button" data-cal-view="month">Maand</button>
+      <button type="button" data-cal-view="year">Jaar</button>
+    </span>
+  </div>
+  <div data-cal-body></div>
+</div>
+
+<div data-ov-pane="list" hidden>
 <ul class="list">
 <?php foreach ($rows as $a): $s = $summary[$a['id']] ?? []; ?>
   <li class="card">
@@ -47,3 +69,7 @@
 <?php endforeach; ?>
 <?php if (!$rows): ?><li class="empty">Geen resultaten.</li><?php endif; ?>
 </ul>
+</div>
+
+<script>window.CALENDAR_EVENTS = <?= json_encode($calendar ?? [], JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP) ?>;</script>
+<script src="/assets/calendar.js"></script>

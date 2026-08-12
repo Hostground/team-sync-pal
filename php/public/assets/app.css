@@ -50,3 +50,57 @@
 .checklist-tools .inline{display:flex;gap:.5rem}
 .checklist-tools .inline select,.checklist-tools .inline input{flex:1;min-width:0;padding:.55rem;border:1px solid var(--border);border-radius:.45rem;font:inherit;background:#fff}
 @media(min-width:640px){.checklist-tools{flex-direction:row;flex-wrap:wrap}.checklist-tools .inline{flex:1 1 260px}}
+
+/* Agenda (overzicht) */
+.tabs{display:flex;gap:.4rem;margin:.8rem 0}
+.tabs button{padding:.45rem .9rem;border:1px solid var(--border);background:#fff;border-radius:999px;cursor:pointer;font:inherit}
+.tabs button.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.cal-toolbar{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
+.cal-toolbar .cal-title{font-weight:600;flex:1;min-width:8rem}
+.cal-views{display:flex;gap:.25rem}
+.cal-views button{padding:.35rem .6rem;border:1px solid var(--border);background:#fff;border-radius:.4rem;cursor:pointer;font:inherit;font-size:.85rem}
+.cal-views button.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.cal-timegrid{background:#fff;border:1px solid var(--border);border-radius:.6rem;overflow:hidden}
+.cal-head{display:flex;border-bottom:1px solid var(--border)}
+.cal-head .cal-gutter{flex:0 0 44px}
+.cal-dayhead{flex:1 1 0;min-width:0;text-align:center;padding:.4rem .2rem;font-size:.8rem;color:var(--muted);cursor:pointer}
+.cal-dayhead.today{color:var(--pri);font-weight:700}
+.cal-scroll{max-height:70vh;overflow:auto}
+.cal-body{display:flex;position:relative}
+.cal-body .cal-gutter{flex:0 0 44px;border-right:1px solid var(--border)}
+.cal-hour{height:var(--hour);border-bottom:1px solid #f1f2f4;position:relative}
+.cal-gutter .cal-hour span{position:absolute;top:-.5em;right:.25rem;font-size:.65rem;color:var(--muted)}
+.cal-daycol{flex:1 1 0;min-width:0;position:relative;border-right:1px solid #f1f2f4}
+.cal-daycol.today{background:#f5f8ff}
+.cal-ev{position:absolute;overflow:hidden;display:flex;gap:.25rem;background:#fff;border:1px solid var(--border);border-left:3px solid var(--pri);border-radius:.35rem;padding:.15rem .25rem;font-size:.7rem;text-decoration:none;color:inherit;line-height:1.15}
+.cal-ev.status-confirmed{border-left-color:var(--ok)}
+.cal-ev.status-pending{border-left-color:var(--warn)}
+.cal-ev.status-declined,.cal-ev.status-auto_declined{border-left-color:var(--dan)}
+.cal-ev.status-cancelled{border-left-color:var(--muted);opacity:.7}
+.cal-ev-bar{flex:0 0 3px;border-radius:2px;background:var(--pri)}
+.cal-ev-body{min-width:0}
+.cal-ev-body strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-ev-body em{font-style:normal;color:var(--muted);font-size:.65rem}
+.cal-month-head,.cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-month-head{font-size:.75rem;color:var(--muted);text-align:center;padding:.25rem 0}
+.cal-month-grid{background:#fff;border:1px solid var(--border);border-radius:.6rem;overflow:hidden}
+.cal-cell{min-height:72px;border-right:1px solid #f1f2f4;border-bottom:1px solid #f1f2f4;padding:.2rem;cursor:pointer;overflow:hidden}
+.cal-cell.out{background:#fafafb;color:var(--muted)}
+.cal-cell.today .cal-daynum{background:var(--pri);color:#fff;border-radius:999px;padding:0 .35rem}
+.cal-daynum{font-size:.75rem;font-weight:600}
+.cal-chip{display:flex;align-items:center;gap:.2rem;font-size:.62rem;margin-top:.12rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#f3f4f6;border-radius:.25rem;padding:.05rem .2rem}
+.cal-chip i{flex:0 0 4px;height:.7em;border-radius:2px;background:var(--pri)}
+.cal-chip.status-pending{background:#fef3c7}
+.cal-chip.status-confirmed{background:#d1fae5}
+.cal-chip.status-declined,.cal-chip.status-auto_declined{background:#fee2e2}
+.cal-more{display:block;font-size:.6rem;color:var(--muted)}
+.cal-year{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+@media(min-width:700px){.cal-year{grid-template-columns:repeat(4,1fr)}}
+.cal-mini{background:#fff;border:1px solid var(--border);border-radius:.5rem;padding:.4rem}
+.cal-mini h4{margin:0 0 .3rem;font-size:.8rem;cursor:pointer}
+.cal-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;text-align:center}
+.cal-mini-dow{font-size:.55rem;color:var(--muted)}
+.cal-mini-day{font-size:.6rem;padding:.15rem 0;border-radius:.2rem;cursor:pointer}
+.cal-mini-day.out{visibility:hidden}
+.cal-mini-day.lvl1{background:#dbeafe}.cal-mini-day.lvl2{background:#93c5fd}.cal-mini-day.lvl3{background:#2563eb;color:#fff}
+.cal-mini-day.today{outline:1px solid var(--pri)}
