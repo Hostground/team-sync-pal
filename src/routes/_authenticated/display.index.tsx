@@ -91,7 +91,7 @@ function DisplayAdminPage() {
     refetchAll();
   };
 
-  const updateTemplate = async (id: string, patch: Record<string, unknown>) => {
+  const updateTemplate = async (id: string, patch: any) => {
     const { error } = await supabase.from("display_templates").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["display-templates"] });
@@ -117,7 +117,7 @@ function DisplayAdminPage() {
     qc.invalidateQueries({ queryKey: ["display-slides", activeTemplate] });
   };
 
-  const updateSlide = async (id: string, patch: Record<string, unknown>) => {
+  const updateSlide = async (id: string, patch: any) => {
     const { error } = await supabase.from("display_slides").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["display-slides", activeTemplate] });
@@ -174,7 +174,7 @@ function DisplayAdminPage() {
     qc.invalidateQueries({ queryKey: ["displays"] });
   };
 
-  const updateDisplay = async (id: string, patch: Record<string, unknown>) => {
+  const updateDisplay = async (id: string, patch: any) => {
     const { error } = await supabase.from("displays").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["displays"] });
