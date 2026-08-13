@@ -209,3 +209,52 @@ CREATE TABLE IF NOT EXISTS checklist_template_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS=1;
+
+-- =============================
+-- Infoscherm (lobby TV)
+-- =============================
+SET FOREIGN_KEY_CHECKS=0;
+
+CREATE TABLE IF NOT EXISTS display_templates (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  theme TEXT NULL,
+  show_clock TINYINT(1) NOT NULL DEFAULT 1,
+  clock_position VARCHAR(20) NOT NULL DEFAULT 'top-right',
+  default_slide_seconds INT NOT NULL DEFAULT 10,
+  created_by CHAR(36) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_dtpl_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS display_slides (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  template_id CHAR(36) NOT NULL,
+  kind ENUM('text','photos','planning_today') NOT NULL DEFAULT 'text',
+  position INT NOT NULL DEFAULT 0,
+  title VARCHAR(200) NULL,
+  body TEXT NULL,
+  media TEXT NULL,
+  seconds INT NULL,
+  active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_tpl (template_id, position),
+  CONSTRAINT fk_dsl_tpl FOREIGN KEY (template_id) REFERENCES display_templates(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS displays (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  code VARCHAR(64) NOT NULL UNIQUE,
+  template_id CHAR(36) NULL,
+  active TINYINT(1) NOT NULL DEFAULT 1,
+  timezone VARCHAR(64) NOT NULL DEFAULT 'Europe/Brussels',
+  created_by CHAR(36) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_disp_tpl FOREIGN KEY (template_id) REFERENCES display_templates(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS=1;

@@ -34,6 +34,10 @@ $router->post('/login',        [\App\Controllers\AuthController::class, 'login']
 $router->get('/register',      [\App\Controllers\AuthController::class, 'showRegister']);
 $router->post('/register',     [\App\Controllers\AuthController::class, 'register']);
 $router->post('/logout',       [\App\Controllers\AuthController::class, 'logout']);
+// Infoscherm (publieke TV-link met geheime code)
+$router->get('/display/{code}/data', [\App\Controllers\DisplayController::class, 'data']);
+$router->get('/display/{code}',      [\App\Controllers\DisplayController::class, 'show']);
+
 $router->get('/respond',       [\App\Controllers\ApiController::class, 'respondForm']);
 $router->post('/respond',      [\App\Controllers\ApiController::class, 'respondSubmit']);
 
@@ -85,5 +89,16 @@ $router->post('/checklist/save-template',  [\App\Controllers\ChecklistController
 $router->get('/checklist-templates',       [\App\Controllers\ChecklistController::class, 'templates'], 'staff');
 $router->post('/checklist-templates',      [\App\Controllers\ChecklistController::class, 'storeTemplate'], 'staff');
 $router->post('/checklist-templates/{id}/delete', [\App\Controllers\ChecklistController::class, 'deleteTemplate'], 'staff');
+
+// Infoscherm beheer
+$router->get('/display-admin',                        [\App\Controllers\DisplayController::class, 'admin'], 'staff');
+$router->post('/display-admin/displays',              [\App\Controllers\DisplayController::class, 'saveDisplay'], 'staff');
+$router->post('/display-admin/displays/{id}/regen',   [\App\Controllers\DisplayController::class, 'regenCode'], 'staff');
+$router->post('/display-admin/displays/{id}/delete',  [\App\Controllers\DisplayController::class, 'deleteDisplay'], 'staff');
+$router->post('/display-admin/templates',             [\App\Controllers\DisplayController::class, 'saveTemplate'], 'staff');
+$router->post('/display-admin/templates/{id}/delete', [\App\Controllers\DisplayController::class, 'deleteTemplate'], 'staff');
+$router->post('/display-admin/slides',                [\App\Controllers\DisplayController::class, 'saveSlide'], 'staff');
+$router->post('/display-admin/slides/{id}/move',      [\App\Controllers\DisplayController::class, 'moveSlide'], 'staff');
+$router->post('/display-admin/slides/{id}/delete',    [\App\Controllers\DisplayController::class, 'deleteSlide'], 'staff');
 
 $router->dispatch();
