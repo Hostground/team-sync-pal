@@ -26,6 +26,7 @@ if ($user) {
       <a href="/overzicht">Overzicht</a>
       <a href="/templates">Sjablonen</a>
       <a href="/checklist-templates">Checklists</a>
+      <a href="/display-admin">Infoscherm</a>
     <?php endif; ?>
     <a href="/notifications">Meldingen<?php if ($unread): ?> <span class="badge"><?= $unread ?></span><?php endif; ?></a>
     <?php if (Auth::isAdmin()): ?>
