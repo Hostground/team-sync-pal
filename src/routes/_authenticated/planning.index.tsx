@@ -92,7 +92,14 @@ function PlanningList() {
                           {a.assignee?.full_name ?? a.assignee?.email ?? "—"}
                         </p>
                       </div>
-                      <Badge variant={st.variant}>{st.label}</Badge>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <Badge variant={st.variant}>{st.label}</Badge>
+                        {a.is_rolling && (
+                          <Badge variant="outline" className="text-[10px]">
+                            <Repeat className="h-3 w-3 mr-1" /> Lopend
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0 text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
