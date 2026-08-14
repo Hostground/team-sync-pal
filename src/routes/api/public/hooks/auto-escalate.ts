@@ -167,7 +167,7 @@ export const Route = createFileRoute("/api/public/hooks/auto-escalate")({
           }
         }
 
-        return Response.json({ ok: true, escalated: overdue.length });
+        return Response.json({ ok: true, escalated: overdue.length, rolled });
       },
     },
   },
