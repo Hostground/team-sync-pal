@@ -195,6 +195,55 @@ export const respondActivity = createServerFn({ method: "POST" })
   });
 
 
+const CompleteSchema = z.object({
+  activity_id: z.string().uuid(),
+  note: z.string().max(500).optional(),
+  auto: z.boolean().optional(),
+});
+
+/** Mark an activity as completed (assignee or staff). Stops rolling activities from moving on. */
+export const completeActivity = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => CompleteSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const { data: act } = await supabase
+      .from("activities")
+      .select("id,status,assignee_id")
+      .eq("id", data.activity_id)
+      .maybeSingle();
+    if (!act) throw new Error("Activiteit niet gevonden");
+    if (act.status === "completed") return { ok: true, already: true };
+
+    if (act.assignee_id !== userId) {
+      await assertStaff(supabase, userId);
+    }
+
+    const nowIso = new Date().toISOString();
+    const { error } = await supabase
+      .from("activities")
+      .update({ status: "completed", completed_at: nowIso, completed_by: userId })
+      .eq("id", data.activity_id);
+    if (error) throw new Error(error.message);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    try {
+      await supabaseAdmin.from("activity_audit_log").insert({
+        activity_id: data.activity_id,
+        actor_id: userId,
+        action: "completed",
+        note: data.note ?? (data.auto ? "Automatisch afgerond: alle taken afgevinkt" : null),
+        previous_status: act.status,
+        new_status: "completed",
+      });
+    } catch (e) {
+      console.error("audit log insert failed", e);
+    }
+
+    return { ok: true };
+  });
+
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ notification_id: z.string().uuid() }).parse(data))
