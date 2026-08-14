@@ -329,12 +329,15 @@ export const adminSetRole = createServerFn({ method: "POST" })
   });
 
 const OverviewFiltersSchema = z.object({
-  status: z.enum(["pending", "confirmed", "declined", "auto_declined", "cancelled"]).optional(),
+  status: z
+    .enum(["pending", "confirmed", "declined", "auto_declined", "cancelled", "completed"])
+    .optional(),
   assignee_id: z.string().uuid().optional(),
   type_id: z.string().uuid().optional(),
   from: z.string().optional(),
   to: z.string().optional(),
   only_unread: z.boolean().optional(),
+  only_rolling: z.boolean().optional(),
 });
 
 export const getActivityOverview = createServerFn({ method: "POST" })
