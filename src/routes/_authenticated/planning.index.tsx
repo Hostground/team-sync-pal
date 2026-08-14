@@ -19,6 +19,7 @@ const statusMeta: Record<string, { label: string; variant: "default" | "secondar
   declined: { label: "Geweigerd", variant: "destructive" },
   auto_declined: { label: "Auto-geweigerd", variant: "destructive" },
   cancelled: { label: "Geannuleerd", variant: "outline" },
+  completed: { label: "Afgerond", variant: "default" },
 };
 
 function PlanningList() {
