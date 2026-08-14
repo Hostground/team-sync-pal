@@ -12,6 +12,7 @@ const CreateActivitySchema = z.object({
   description: z.string().max(2000).optional().nullable(),
   respond_by: z.string().optional(),
   response_window_hours: z.number().min(1).max(720).optional(),
+  is_rolling: z.boolean().optional(),
 });
 
 async function assertStaff(supabase: any, userId: string) {
