@@ -54,6 +54,8 @@ export const createActivity = createServerFn({ method: "POST" })
         location: data.location ?? null,
         description: data.description ?? null,
         respond_by: respondBy,
+        is_rolling: data.is_rolling ?? false,
+        original_start_at: data.start_at,
       })
       .select()
       .single();
