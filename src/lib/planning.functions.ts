@@ -356,6 +356,7 @@ export const getActivityOverview = createServerFn({ method: "POST" })
       .limit(500);
 
     if (data.status) q = q.eq("status", data.status);
+    if (data.only_rolling) q = q.eq("is_rolling", true);
     if (data.assignee_id) q = q.eq("assignee_id", data.assignee_id);
     if (data.type_id) q = q.eq("type_id", data.type_id);
     if (data.from) q = q.gte("start_at", data.from);
