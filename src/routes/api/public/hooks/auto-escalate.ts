@@ -37,10 +37,57 @@ export const Route = createFileRoute("/api/public/hooks/auto-escalate")({
         }
 
         const nowIso = new Date().toISOString();
+        const DAY_MS = 86_400_000;
+
+        // 1. Rolling activities that are not finished roll over to the next day.
+        let rolled = 0;
+        const { data: rolling } = await admin
+          .from("activities")
+          .select("id, start_at, end_at, respond_by, status, rollover_count")
+          .eq("is_rolling", true)
+          .in("status", ["pending", "confirmed", "declined", "auto_declined"])
+          .lt("end_at", nowIso);
+
+        for (const a of rolling ?? []) {
+          const start = new Date(a.start_at).getTime();
+          const end = new Date(a.end_at).getTime();
+          // Shift forward in whole days until the end lands in the future.
+          const daysBehind = Math.max(1, Math.ceil((Date.now() - end) / DAY_MS));
+          const patch: Record<string, unknown> = {
+            start_at: new Date(start + daysBehind * DAY_MS).toISOString(),
+            end_at: new Date(end + daysBehind * DAY_MS).toISOString(),
+            rollover_count: (a.rollover_count ?? 0) + 1,
+            updated_at: nowIso,
+          };
+          if (a.status === "pending") {
+            patch.respond_by = new Date(
+              new Date(a.respond_by).getTime() + daysBehind * DAY_MS,
+            ).toISOString();
+          }
+          const { error: rollErr } = await admin.from("activities").update(patch).eq("id", a.id);
+          if (rollErr) {
+            console.error("rollover failed", a.id, rollErr.message);
+            continue;
+          }
+          rolled++;
+          await admin.from("activity_audit_log").insert({
+            activity_id: a.id,
+            actor_id: null,
+            action: "rolled_over",
+            previous_status: a.status,
+            new_status: a.status,
+            note: `Lopende activiteit doorgeschoven: ${new Date(a.start_at).toLocaleString("nl-BE")} → ${new Date(
+              start + daysBehind * DAY_MS,
+            ).toLocaleString("nl-BE")}`,
+          });
+        }
+
+        // 2. Overdue non-rolling activities are auto-declined and escalated.
         const { data: overdue, error: fetchErr } = await admin
           .from("activities")
           .select("id, title, assignee_id, respond_by, status")
           .eq("status", "pending")
+          .eq("is_rolling", false)
           .lt("respond_by", nowIso);
         if (fetchErr) {
           return new Response(JSON.stringify({ error: fetchErr.message }), {
@@ -50,7 +97,7 @@ export const Route = createFileRoute("/api/public/hooks/auto-escalate")({
         }
 
         if (!overdue || overdue.length === 0) {
-          return Response.json({ ok: true, escalated: 0 });
+          return Response.json({ ok: true, escalated: 0, rolled });
         }
 
         // Update statuses in one batch
