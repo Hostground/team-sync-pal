@@ -37,6 +37,7 @@ export const statusLabels: Record<string, string> = {
   declined: "Geweigerd",
   auto_declined: "Auto-geweigerd",
   cancelled: "Geannuleerd",
+  completed: "Afgerond",
 };
 
 export function statusBadgeVariant(
@@ -44,6 +45,7 @@ export function statusBadgeVariant(
 ): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "confirmed":
+    case "completed":
       return "default";
     case "pending":
       return "secondary";
