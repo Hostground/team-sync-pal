@@ -17,16 +17,21 @@ export type Database = {
       activities: {
         Row: {
           assignee_id: string
+          completed_at: string | null
+          completed_by: string | null
           created_at: string
           created_by: string
           description: string | null
           end_at: string
           id: string
+          is_rolling: boolean
           location: string | null
+          original_start_at: string | null
           reminder_sent_at: string | null
           respond_by: string
           responded_at: string | null
           response_note: string | null
+          rollover_count: number
           start_at: string
           status: Database["public"]["Enums"]["activity_status"]
           template_id: string | null
@@ -36,16 +41,21 @@ export type Database = {
         }
         Insert: {
           assignee_id: string
+          completed_at?: string | null
+          completed_by?: string | null
           created_at?: string
           created_by: string
           description?: string | null
           end_at: string
           id?: string
+          is_rolling?: boolean
           location?: string | null
+          original_start_at?: string | null
           reminder_sent_at?: string | null
           respond_by: string
           responded_at?: string | null
           response_note?: string | null
+          rollover_count?: number
           start_at: string
           status?: Database["public"]["Enums"]["activity_status"]
           template_id?: string | null
@@ -55,16 +65,21 @@ export type Database = {
         }
         Update: {
           assignee_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
           end_at?: string
           id?: string
+          is_rolling?: boolean
           location?: string | null
+          original_start_at?: string | null
           reminder_sent_at?: string | null
           respond_by?: string
           responded_at?: string | null
           response_note?: string | null
+          rollover_count?: number
           start_at?: string
           status?: Database["public"]["Enums"]["activity_status"]
           template_id?: string | null
@@ -748,6 +763,7 @@ export type Database = {
         | "declined"
         | "auto_declined"
         | "cancelled"
+        | "completed"
       app_role: "admin" | "management" | "employee"
       audit_action:
         | "confirmed"
@@ -755,6 +771,8 @@ export type Database = {
         | "auto_declined"
         | "cancelled"
         | "rescheduled"
+        | "completed"
+        | "rolled_over"
       delivery_status:
         | "queued"
         | "sent"
@@ -896,6 +914,7 @@ export const Constants = {
         "declined",
         "auto_declined",
         "cancelled",
+        "completed",
       ],
       app_role: ["admin", "management", "employee"],
       audit_action: [
@@ -904,6 +923,8 @@ export const Constants = {
         "auto_declined",
         "cancelled",
         "rescheduled",
+        "completed",
+        "rolled_over",
       ],
       delivery_status: [
         "queued",
