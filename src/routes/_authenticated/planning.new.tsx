@@ -79,6 +79,7 @@ function NewActivity() {
           location: form.location || null,
           description: form.description || null,
           response_window_hours: form.response_window_hours,
+          is_rolling: form.is_rolling,
         },
       });
       if (form.save_as_template && form.template_name.trim()) {
