@@ -33,6 +33,7 @@ function ActivityDetail() {
   const navigate = useNavigate();
   const { data: me } = useCurrentUser();
   const respond = useServerFn(respondActivity);
+  const complete = useServerFn(completeActivity);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
