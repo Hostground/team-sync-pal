@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { respondActivity, getActivityAuditLog } from "@/lib/planning.functions";
+import { respondActivity, getActivityAuditLog, completeActivity } from "@/lib/planning.functions";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { ChecklistPanel } from "@/components/ChecklistPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ChevronLeft, MapPin, Clock, User, FileText, Bell } from "lucide-react";
+import { ChevronLeft, MapPin, Clock, User, FileText, Bell, Repeat, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -25,6 +25,7 @@ const statusMeta: Record<string, { label: string; variant: "default" | "secondar
   declined: { label: "Geweigerd", variant: "destructive" },
   auto_declined: { label: "Auto-geweigerd", variant: "destructive" },
   cancelled: { label: "Geannuleerd", variant: "outline" },
+  completed: { label: "Afgerond", variant: "default" },
 };
 
 function ActivityDetail() {
