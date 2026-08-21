@@ -41,9 +41,11 @@ type Props = {
   /** Personal checklist for the signed-in user */
   personal?: boolean;
   title?: string;
+  /** Called when the last open item gets checked off */
+  onAllDone?: () => void | Promise<void>;
 };
 
-export function ChecklistPanel({ activityId, personal, title = "Taken" }: Props) {
+export function ChecklistPanel({ activityId, personal, title = "Taken", onAllDone }: Props) {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const userId = me?.user.id;
