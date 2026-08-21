@@ -164,6 +164,7 @@ function OverviewPage() {
                 <SelectItem value="declined">Geweigerd</SelectItem>
                 <SelectItem value="auto_declined">Auto-geweigerd</SelectItem>
                 <SelectItem value="cancelled">Geannuleerd</SelectItem>
+                <SelectItem value="completed">Afgerond</SelectItem>
               </SelectContent>
             </Select>
           </div>
