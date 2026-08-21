@@ -43,6 +43,7 @@ function NewActivity() {
     location: "",
     description: "",
     response_window_hours: 24,
+    is_rolling: false,
     save_as_template: false,
     template_name: "",
   });
