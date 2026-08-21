@@ -48,6 +48,7 @@ const statusMeta: Record<
   declined: { label: "Geweigerd", variant: "destructive" },
   auto_declined: { label: "Auto-geweigerd", variant: "destructive" },
   cancelled: { label: "Geannuleerd", variant: "outline" },
+  completed: { label: "Afgerond", variant: "default" },
 };
 
 const ALL = "__all__";
