@@ -120,6 +120,7 @@ function PlanningList() {
                         {format(new Date(a.respond_by), "d MMM HH:mm", { locale: nl })}
                       </span>
                     )}
+                    {a.rollover_count > 0 && <span>{a.rollover_count}× doorgeschoven</span>}
 
                   </CardContent>
                 </Card>
