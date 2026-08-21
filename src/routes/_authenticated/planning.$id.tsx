@@ -141,7 +141,14 @@ function ActivityDetail() {
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">{a.activity_types?.name ?? "Geen type"}</p>
             </div>
-            <Badge variant={st.variant}>{st.label}</Badge>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <Badge variant={st.variant}>{st.label}</Badge>
+              {a.is_rolling && (
+                <Badge variant="outline" className="text-xs">
+                  <Repeat className="h-3 w-3 mr-1" /> Lopend
+                </Badge>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
