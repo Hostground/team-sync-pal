@@ -202,7 +202,29 @@ function ActivityDetail() {
         </CardContent>
       </Card>
 
-      <ChecklistPanel activityId={id} />
+      <ChecklistPanel
+        activityId={id}
+        onAllDone={
+          canComplete
+            ? async () => {
+                try {
+                  await complete({ data: { activity_id: id, auto: true } });
+                  toast.success("Alle taken klaar — activiteit afgerond");
+                  refetch();
+                } catch {
+                  /* stil: afronden mag falen zonder de takenlijst te blokkeren */
+                }
+              }
+            : undefined
+        }
+      />
+
+      {canComplete && (
+        <Button className="w-full" variant="secondary" disabled={loading} onClick={handleComplete}>
+          <CheckCircle2 className="h-4 w-4 mr-1" /> Activiteit afronden
+        </Button>
+      )}
+
 
 
 
