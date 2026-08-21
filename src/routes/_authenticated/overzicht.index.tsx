@@ -215,6 +215,13 @@ function OverviewPage() {
               />
               Alleen ongelezen
             </label>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={onlyRolling}
+                onCheckedChange={(v) => setOnlyRolling(v === true)}
+              />
+              Alleen lopende
+            </label>
             <Button variant="ghost" size="sm" onClick={reset}>Reset</Button>
           </div>
         </CardContent>
