@@ -87,12 +87,28 @@ function ActivityDetail() {
   const st = statusMeta[a.status] ?? statusMeta.pending;
   const isAssignee = me?.user.id === a.assignee_id;
   const canRespond = isAssignee && a.status === "pending";
+  const canComplete =
+    (isAssignee || isStaff(me?.role)) &&
+    !["completed", "cancelled"].includes(a.status);
 
   const handle = async (action: "confirm" | "decline") => {
     setLoading(true);
     try {
       await respond({ data: { activity_id: id, action, note: note || undefined } });
       toast.success(action === "confirm" ? "Bevestigd" : "Geweigerd");
+      refetch();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    setLoading(true);
+    try {
+      await complete({ data: { activity_id: id } });
+      toast.success("Activiteit afgerond");
       refetch();
     } catch (e: any) {
       toast.error(e.message);
