@@ -138,7 +138,6 @@ export function ChecklistPanel({ activityId, personal, title = "Taken", onAllDon
         .update({ done, done_at: done ? new Date().toISOString() : null, done_by: done ? userId! : null })
         .eq("id", item.id);
       if (error) throw new Error(error.message);
-      if (error) throw new Error(error.message);
       if (done && onAllDone) {
         const all = qc.getQueryData<ChecklistItem[]>(scopeKey) ?? [];
         const stillOpen = all.filter((i) => i.id !== item.id && !i.done);
