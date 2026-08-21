@@ -43,6 +43,7 @@ function NewActivity() {
     location: "",
     description: "",
     response_window_hours: 24,
+    is_rolling: false,
     save_as_template: false,
     template_name: "",
   });
@@ -78,6 +79,7 @@ function NewActivity() {
           location: form.location || null,
           description: form.description || null,
           response_window_hours: form.response_window_hours,
+          is_rolling: form.is_rolling,
         },
       });
       if (form.save_as_template && form.template_name.trim()) {
@@ -194,6 +196,23 @@ function NewActivity() {
                 onChange={(e) => setForm({ ...form, response_window_hours: Number(e.target.value) })}
               />
               <p className="text-xs text-muted-foreground mt-1">Zonder reactie → automatisch geweigerd.</p>
+            </div>
+            <div className="border-t pt-3">
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={form.is_rolling}
+                  onChange={(e) => setForm({ ...form, is_rolling: e.target.checked })}
+                />
+                <span>
+                  Lopende activiteit
+                  <span className="block text-xs text-muted-foreground">
+                    Niet afgerond? Dan schuift de activiteit automatisch door naar de volgende dag
+                    (zelfde uren) en wordt ze niet automatisch geweigerd.
+                  </span>
+                </span>
+              </label>
             </div>
             <div className="border-t pt-3 space-y-2">
               <label className="flex items-center gap-2 text-sm">

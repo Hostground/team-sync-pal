@@ -41,9 +41,11 @@ type Props = {
   /** Personal checklist for the signed-in user */
   personal?: boolean;
   title?: string;
+  /** Called when the last open item gets checked off */
+  onAllDone?: () => void | Promise<void>;
 };
 
-export function ChecklistPanel({ activityId, personal, title = "Taken" }: Props) {
+export function ChecklistPanel({ activityId, personal, title = "Taken", onAllDone }: Props) {
   const qc = useQueryClient();
   const { data: me } = useCurrentUser();
   const userId = me?.user.id;
@@ -136,6 +138,11 @@ export function ChecklistPanel({ activityId, personal, title = "Taken" }: Props)
         .update({ done, done_at: done ? new Date().toISOString() : null, done_by: done ? userId! : null })
         .eq("id", item.id);
       if (error) throw new Error(error.message);
+      if (done && onAllDone) {
+        const all = qc.getQueryData<ChecklistItem[]>(scopeKey) ?? [];
+        const stillOpen = all.filter((i) => i.id !== item.id && !i.done);
+        if (all.length > 0 && stillOpen.length === 0) await onAllDone();
+      }
     },
     onMutate: async (item: ChecklistItem) => {
       await qc.cancelQueries({ queryKey: scopeKey });

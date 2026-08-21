@@ -48,6 +48,7 @@ const statusMeta: Record<
   declined: { label: "Geweigerd", variant: "destructive" },
   auto_declined: { label: "Auto-geweigerd", variant: "destructive" },
   cancelled: { label: "Geannuleerd", variant: "outline" },
+  completed: { label: "Afgerond", variant: "default" },
 };
 
 const ALL = "__all__";
@@ -62,6 +63,7 @@ function OverviewPage() {
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [onlyRolling, setOnlyRolling] = useState(false);
   const [mode, setMode] = useState<"calendar" | "list">("calendar");
   const [view, setView] = useState<CalendarView>("week");
   const [anchor, setAnchor] = useState<Date>(() => new Date());
@@ -98,8 +100,9 @@ function OverviewPage() {
       from: range.from ? range.from.toISOString() : undefined,
       to: range.to ? range.to.toISOString() : undefined,
       only_unread: onlyUnread || undefined,
+      only_rolling: onlyRolling || undefined,
     };
-  }, [status, assigneeId, typeId, from, to, onlyUnread, mode, view, anchor]);
+  }, [status, assigneeId, typeId, from, to, onlyUnread, onlyRolling, mode, view, anchor]);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["overview", filters],
@@ -137,6 +140,7 @@ function OverviewPage() {
     setFrom("");
     setTo("");
     setOnlyUnread(false);
+    setOnlyRolling(false);
   };
 
   return (
@@ -163,6 +167,7 @@ function OverviewPage() {
                 <SelectItem value="declined">Geweigerd</SelectItem>
                 <SelectItem value="auto_declined">Auto-geweigerd</SelectItem>
                 <SelectItem value="cancelled">Geannuleerd</SelectItem>
+                <SelectItem value="completed">Afgerond</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -212,6 +217,13 @@ function OverviewPage() {
                 onCheckedChange={(v) => setOnlyUnread(v === true)}
               />
               Alleen ongelezen
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={onlyRolling}
+                onCheckedChange={(v) => setOnlyRolling(v === true)}
+              />
+              Alleen lopende
             </label>
             <Button variant="ghost" size="sm" onClick={reset}>Reset</Button>
           </div>

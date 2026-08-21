@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { respondActivity, getActivityAuditLog } from "@/lib/planning.functions";
+import { respondActivity, getActivityAuditLog, completeActivity } from "@/lib/planning.functions";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { ChecklistPanel } from "@/components/ChecklistPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ChevronLeft, MapPin, Clock, User, FileText, Bell } from "lucide-react";
+import { ChevronLeft, MapPin, Clock, User, FileText, Bell, Repeat, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -25,6 +25,7 @@ const statusMeta: Record<string, { label: string; variant: "default" | "secondar
   declined: { label: "Geweigerd", variant: "destructive" },
   auto_declined: { label: "Auto-geweigerd", variant: "destructive" },
   cancelled: { label: "Geannuleerd", variant: "outline" },
+  completed: { label: "Afgerond", variant: "default" },
 };
 
 function ActivityDetail() {
@@ -32,6 +33,7 @@ function ActivityDetail() {
   const navigate = useNavigate();
   const { data: me } = useCurrentUser();
   const respond = useServerFn(respondActivity);
+  const complete = useServerFn(completeActivity);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -85,12 +87,28 @@ function ActivityDetail() {
   const st = statusMeta[a.status] ?? statusMeta.pending;
   const isAssignee = me?.user.id === a.assignee_id;
   const canRespond = isAssignee && a.status === "pending";
+  const canComplete =
+    (isAssignee || isStaff(me?.role)) &&
+    !["completed", "cancelled"].includes(a.status);
 
   const handle = async (action: "confirm" | "decline") => {
     setLoading(true);
     try {
       await respond({ data: { activity_id: id, action, note: note || undefined } });
       toast.success(action === "confirm" ? "Bevestigd" : "Geweigerd");
+      refetch();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    setLoading(true);
+    try {
+      await complete({ data: { activity_id: id } });
+      toast.success("Activiteit afgerond");
       refetch();
     } catch (e: any) {
       toast.error(e.message);
@@ -123,7 +141,14 @@ function ActivityDetail() {
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">{a.activity_types?.name ?? "Geen type"}</p>
             </div>
-            <Badge variant={st.variant}>{st.label}</Badge>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <Badge variant={st.variant}>{st.label}</Badge>
+              {a.is_rolling && (
+                <Badge variant="outline" className="text-xs">
+                  <Repeat className="h-3 w-3 mr-1" /> Lopend
+                </Badge>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
@@ -153,6 +178,20 @@ function ActivityDetail() {
               {format(new Date(a.respond_by), "EEE d MMM HH:mm", { locale: nl })}
             </p>
           )}
+          {a.is_rolling && (
+            <p className="text-xs text-muted-foreground">
+              Lopende activiteit — schuift automatisch door naar de volgende dag zolang ze niet
+              afgerond is.
+              {a.rollover_count > 0 && ` Al ${a.rollover_count}× doorgeschoven.`}
+              {a.original_start_at &&
+                ` Oorspronkelijk gepland op ${format(new Date(a.original_start_at), "d MMM yyyy HH:mm", { locale: nl })}.`}
+            </p>
+          )}
+          {a.completed_at && (
+            <p className="text-xs text-muted-foreground">
+              Afgerond op {format(new Date(a.completed_at), "d MMM yyyy HH:mm", { locale: nl })}
+            </p>
+          )}
 
           {a.response_note && (
             <div className="rounded border p-2 bg-muted/30">
@@ -163,7 +202,29 @@ function ActivityDetail() {
         </CardContent>
       </Card>
 
-      <ChecklistPanel activityId={id} />
+      <ChecklistPanel
+        activityId={id}
+        onAllDone={
+          canComplete
+            ? async () => {
+                try {
+                  await complete({ data: { activity_id: id, auto: true } });
+                  toast.success("Alle taken klaar — activiteit afgerond");
+                  refetch();
+                } catch {
+                  /* stil: afronden mag falen zonder de takenlijst te blokkeren */
+                }
+              }
+            : undefined
+        }
+      />
+
+      {canComplete && (
+        <Button className="w-full" variant="secondary" disabled={loading} onClick={handleComplete}>
+          <CheckCircle2 className="h-4 w-4 mr-1" /> Activiteit afronden
+        </Button>
+      )}
+
 
 
 

@@ -141,4 +141,24 @@ class PlanningController {
         }
         header('Location: /planning/'.$p['id']); exit;
     }
+
+    /** Markeer een activiteit als afgerond (toegewezen medewerker of staff). */
+    public function complete(array $p): void {
+        $a = Db::one('SELECT * FROM activities WHERE id = ?', [$p['id']]);
+        if (!$a) { http_response_code(404); return; }
+        if (!Auth::isStaff() && $a['assignee_id'] !== Auth::id()) { http_response_code(403); return; }
+        if (in_array($a['status'], ['completed','cancelled'], true)) { header('Location: /planning/'.$p['id']); return; }
+
+        Db::q('UPDATE activities SET status=?, completed_at=NOW(), completed_by=? WHERE id=?',
+              ['completed', Auth::id(), $p['id']]);
+        Audit::log($p['id'], Auth::id(), 'completed', $a['status'], 'completed',
+                   !empty($_POST['auto']) ? 'Automatisch afgerond: alle taken afgevinkt' : null);
+
+        if (!empty($_POST['json'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => true]);
+            return;
+        }
+        header('Location: /planning/'.$p['id']); exit;
+    }
 }
