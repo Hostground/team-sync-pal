@@ -178,6 +178,20 @@ function ActivityDetail() {
               {format(new Date(a.respond_by), "EEE d MMM HH:mm", { locale: nl })}
             </p>
           )}
+          {a.is_rolling && (
+            <p className="text-xs text-muted-foreground">
+              Lopende activiteit — schuift automatisch door naar de volgende dag zolang ze niet
+              afgerond is.
+              {a.rollover_count > 0 && ` Al ${a.rollover_count}× doorgeschoven.`}
+              {a.original_start_at &&
+                ` Oorspronkelijk gepland op ${format(new Date(a.original_start_at), "d MMM yyyy HH:mm", { locale: nl })}.`}
+            </p>
+          )}
+          {a.completed_at && (
+            <p className="text-xs text-muted-foreground">
+              Afgerond op {format(new Date(a.completed_at), "d MMM yyyy HH:mm", { locale: nl })}
+            </p>
+          )}
 
           {a.response_note && (
             <div className="rounded border p-2 bg-muted/30">
