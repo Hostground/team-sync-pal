@@ -5,7 +5,7 @@ import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MapPin, Clock } from "lucide-react";
+import { Plus, MapPin, Clock, Repeat } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
