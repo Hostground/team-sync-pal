@@ -100,8 +100,9 @@ function OverviewPage() {
       from: range.from ? range.from.toISOString() : undefined,
       to: range.to ? range.to.toISOString() : undefined,
       only_unread: onlyUnread || undefined,
+      only_rolling: onlyRolling || undefined,
     };
-  }, [status, assigneeId, typeId, from, to, onlyUnread, mode, view, anchor]);
+  }, [status, assigneeId, typeId, from, to, onlyUnread, onlyRolling, mode, view, anchor]);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["overview", filters],
