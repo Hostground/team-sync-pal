@@ -140,6 +140,7 @@ function OverviewPage() {
     setFrom("");
     setTo("");
     setOnlyUnread(false);
+    setOnlyRolling(false);
   };
 
   return (
