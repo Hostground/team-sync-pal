@@ -30,6 +30,7 @@
   <label>Locatie<input name="location" id="location"></label>
   <label>Omschrijving<textarea name="description" id="description" rows="3"></textarea></label>
   <label>Bevestigingstermijn (uren, leeg = standaard)<input type="number" min="1" max="720" name="response_window_hours"></label>
+  <label class="inline"><input type="checkbox" name="is_rolling" value="1"> Lopende activiteit (schuift automatisch door naar de volgende dag zolang ze niet afgerond is)</label>
   <button class="btn primary" type="submit">Aanmaken</button>
 </form>
 <script>

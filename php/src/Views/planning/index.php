@@ -3,10 +3,11 @@
 <form method="get" class="filters">
   <select name="status" onchange="this.form.submit()">
     <option value="">Alle statussen</option>
-    <?php foreach (['pending'=>'In afwachting','confirmed'=>'Bevestigd','declined'=>'Geweigerd','auto_declined'=>'Auto-geweigerd','cancelled'=>'Geannuleerd'] as $k=>$v): ?>
+    <?php foreach (['pending'=>'In afwachting','confirmed'=>'Bevestigd','declined'=>'Geweigerd','auto_declined'=>'Auto-geweigerd','cancelled'=>'Geannuleerd','completed'=>'Afgerond'] as $k=>$v): ?>
       <option value="<?= $k ?>" <?= ($_GET['status'] ?? '')===$k?'selected':'' ?>><?= $v ?></option>
     <?php endforeach; ?>
   </select>
+  <label class="inline"><input type="checkbox" name="rolling" value="1" onchange="this.form.submit()" <?= !empty($_GET['rolling'])?'checked':'' ?>> Alleen lopende</label>
 </form>
 <ul class="list">
 <?php foreach ($rows as $a): $overdue = $a['status']==='pending' && strtotime($a['respond_by'])<time(); ?>
@@ -15,6 +16,7 @@
       <div class="row">
         <strong><?= View::e($a['title']) ?></strong>
         <span class="badge status-<?= $a['status'] ?>"><?= $a['status'] ?></span>
+        <?php if (!empty($a['is_rolling'])): ?><span class="badge">Lopend</span><?php endif; ?>
       </div>
       <div class="meta">
         <?= View::fmtDate($a['start_at'],'d/m H:i') ?> – <?= View::fmtDate($a['end_at'],'H:i') ?>

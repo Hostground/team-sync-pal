@@ -11,8 +11,28 @@ Config::set($config);
 date_default_timezone_set($config['app']['timezone'] ?? 'Europe/Brussels');
 Db::init($config['db']);
 
-$overdue = Db::all("SELECT * FROM activities WHERE status='pending' AND respond_by < NOW()");
-if (!$overdue) { echo "Niets te escaleren.\n"; exit(0); }
+// 1) Lopende activiteiten die niet afgerond zijn → +1 dag doorschuiven.
+$rolling = Db::all(
+    "SELECT * FROM activities
+     WHERE is_rolling = 1
+       AND status NOT IN ('completed','cancelled','declined','auto_declined')
+       AND end_at < NOW()"
+);
+foreach ($rolling as $a) {
+    $newStart = (new \DateTime($a['start_at']))->modify('+1 day')->format('Y-m-d H:i:s');
+    $newEnd   = (new \DateTime($a['end_at']))->modify('+1 day')->format('Y-m-d H:i:s');
+    $sql = 'UPDATE activities SET start_at=?, end_at=?, rollover_count=rollover_count+1';
+    $args = [$newStart, $newEnd];
+    if ($a['status'] === 'pending') { $sql .= ', respond_by=?'; $args[] = $newEnd; }
+    $sql .= ' WHERE id=?'; $args[] = $a['id'];
+    Db::q($sql, $args);
+    Audit::log($a['id'], null, 'rolled_over', $a['status'], $a['status'],
+        'Doorgeschoven van '.$a['start_at'].' naar '.$newStart);
+}
+
+// 2) Verlopen niet-lopende 'pending' activiteiten → auto_declined.
+$overdue = Db::all("SELECT * FROM activities WHERE status='pending' AND is_rolling = 0 AND respond_by < NOW()");
+if (!$overdue) { echo "Doorgeschoven: ".count($rolling).". Niets te escaleren.\n"; exit(0); }
 
 $staff = Db::all("SELECT DISTINCT user_id FROM user_roles WHERE role IN ('admin','management')");
 
@@ -26,4 +46,4 @@ foreach ($overdue as $a) {
             $a['id']);
     }
 }
-echo "Geëscaleerd: " . count($overdue) . "\n";
+echo "Doorgeschoven: ".count($rolling).". Geëscaleerd: " . count($overdue) . "\n";

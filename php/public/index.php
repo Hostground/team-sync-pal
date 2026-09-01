@@ -53,6 +53,7 @@ $router->get('/planning/new',   [\App\Controllers\PlanningController::class, 'cr
 $router->post('/planning/new',  [\App\Controllers\PlanningController::class, 'store'],  'staff');
 $router->get('/planning/{id}',  [\App\Controllers\PlanningController::class, 'show'],   'auth');
 $router->post('/planning/{id}/respond', [\App\Controllers\PlanningController::class, 'respond'], 'auth');
+$router->post('/planning/{id}/complete', [\App\Controllers\PlanningController::class, 'complete'], 'auth');
 
 $router->get('/notifications',      [\App\Controllers\NotificationController::class, 'index'],   'auth');
 $router->post('/notifications/read',[\App\Controllers\NotificationController::class, 'markRead'], 'auth');

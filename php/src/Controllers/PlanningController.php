@@ -8,9 +8,10 @@ class PlanningController {
         $u = Auth::user();
         $where = '1=1'; $params = [];
         if (!Auth::isStaff()) { $where .= ' AND a.assignee_id = ?'; $params[] = $u['id']; }
-        if (!empty($_GET['status']) && in_array($_GET['status'], ['pending','confirmed','declined','auto_declined','cancelled'], true)) {
+        if (!empty($_GET['status']) && in_array($_GET['status'], ['pending','confirmed','declined','auto_declined','cancelled','completed'], true)) {
             $where .= ' AND a.status = ?'; $params[] = $_GET['status'];
         }
+        if (!empty($_GET['rolling'])) { $where .= ' AND a.is_rolling = 1'; }
         $rows = Db::all(
             "SELECT a.*, u.full_name AS assignee_name, t.name AS type_name, t.color AS type_color
              FROM activities a
@@ -44,15 +45,18 @@ class PlanningController {
         $id = Db::uuid();
         $respondBy = (new \DateTime('now'))->modify("+{$hours} hours")->format('Y-m-d H:i:s');
 
+        $isRolling = !empty($_POST['is_rolling']) ? 1 : 0;
+
         Db::q(
             'INSERT INTO activities
-             (id,title,type_id,assignee_id,created_by,customer,start_at,end_at,location,description,respond_by,template_id)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+             (id,title,type_id,assignee_id,created_by,customer,start_at,end_at,location,description,respond_by,template_id,is_rolling,original_start_at)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [$id, $title, $_POST['type_id'] ?: null, $assignee, Auth::id(),
              $_POST['customer'] ?: null, $start, $end,
              $_POST['location'] ?: null, $_POST['description'] ?: null,
-             $respondBy, $_POST['template_id'] ?: null]
+             $respondBy, $_POST['template_id'] ?: null, $isRolling, $start]
         );
+
 
         Audit::log($id, Auth::id(), 'created', null, 'pending');
 
