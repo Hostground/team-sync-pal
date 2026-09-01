@@ -1,5 +1,6 @@
 <?php use App\{Auth, Csrf, View}; $overdue = $a['status']==='pending' && strtotime($a['respond_by'])<time(); ?>
-<h1><?= View::e($a['title']) ?> <span class="badge status-<?= $a['status'] ?>"><?= $a['status'] ?></span></h1>
+<h1><?= View::e($a['title']) ?> <span class="badge status-<?= $a['status'] ?>"><?= $a['status'] ?></span>
+<?php if (!empty($a['is_rolling'])): ?><span class="badge">Lopend</span><?php endif; ?></h1>
 <div class="card">
   <p><strong>Wanneer:</strong> <?= View::fmtDate($a['start_at']) ?> — <?= View::fmtDate($a['end_at']) ?></p>
   <p><strong>Medewerker:</strong> <?= View::e($a['assignee_name']) ?></p>
