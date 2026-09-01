@@ -87,6 +87,14 @@ document.getElementById('webauthn-login')?.addEventListener('click', async () =>
       cb.addEventListener('change', async function () {
         li.classList.toggle('done', cb.checked);
         await post('/checklist/items/' + it.id + '/toggle');
+        if (cb.checked && activityId) {
+          const stillOpen = data.items.filter(x => x.id !== it.id && !Number(x.done)).length;
+          if (data.items.length && stillOpen === 0) {
+            await post('/planning/' + activityId + '/complete', { auto: '1', json: '1' });
+            location.reload();
+            return;
+          }
+        }
         refresh();
       });
       const span = document.createElement('span');
