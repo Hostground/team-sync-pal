@@ -1,5 +1,9 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getTurnstileConfig, verifyTurnstile } from "@/lib/turnstile.functions";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
@@ -20,6 +24,32 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaNonce, setCaptchaNonce] = useState(0);
+  const verifyCaptcha = useServerFn(verifyTurnstile);
+  const { data: turnstile } = useQuery({
+    queryKey: ["turnstile-config"],
+    queryFn: () => getTurnstileConfig(),
+    staleTime: Infinity,
+  });
+  const captchaOn = Boolean(turnstile?.enabled && turnstile.siteKey);
+
+  /** Valideert de Turnstile-token server-side. Geeft false bij afkeuring. */
+  const passCaptcha = async (action: string) => {
+    if (!captchaOn) return true;
+    if (!captchaToken) {
+      toast.error("Bevestig eerst de bot-controle");
+      return false;
+    }
+    const res = await verifyCaptcha({ data: { token: captchaToken, action } });
+    if (!res.ok) {
+      toast.error(res.error ?? "Bot-verificatie mislukt");
+      setCaptchaToken("");
+      setCaptchaNonce((n) => n + 1);
+      return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -30,8 +60,10 @@ function AuthPage() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (!(await passCaptcha("signin"))) { setLoading(false); return; }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
+    if (captchaOn) { setCaptchaToken(""); setCaptchaNonce((n) => n + 1); }
     if (error) return toast.error(error.message);
     toast.success("Ingelogd");
     navigate({ to: "/planning" });
@@ -40,6 +72,7 @@ function AuthPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    if (!(await passCaptcha("signup"))) { setLoading(false); return; }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -49,6 +82,7 @@ function AuthPage() {
       },
     });
     setLoading(false);
+    if (captchaOn) { setCaptchaToken(""); setCaptchaNonce((n) => n + 1); }
     if (error) return toast.error(error.message);
     toast.success("Account aangemaakt — je bent ingelogd");
     navigate({ to: "/planning" });
@@ -122,6 +156,14 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+
+          {captchaOn && (
+            <TurnstileWidget
+              siteKey={turnstile!.siteKey}
+              onToken={setCaptchaToken}
+              resetKey={captchaNonce}
+            />
+          )}
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
