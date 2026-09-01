@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers;
 
-use App\{Auth, Db, View, Mailer, Config};
+use App\{Auth, Db, View, Mailer, Config, Turnstile};
 
 class AdminController {
     public function users(): void {
@@ -81,6 +81,31 @@ class AdminController {
         }
         $_SESSION['flash_smtp'] = ['type'=>'ok','msg'=>'SMTP-instellingen opgeslagen.'];
         header('Location: /admin/smtp');
+    }
+
+    public function turnstile(): void {
+        $flash = $_SESSION['flash_turnstile'] ?? null; unset($_SESSION['flash_turnstile']);
+        View::render('admin/turnstile', [
+            'title'   => 'Turnstile',
+            'cfg'     => Turnstile::config(),
+            'enabled' => Turnstile::enabled(),
+            'flash'   => $flash,
+        ]);
+    }
+
+    public function saveTurnstile(): void {
+        foreach (['site_key','secret_key'] as $f) {
+            $v = trim($_POST[$f] ?? '');
+            if ($f === 'secret_key' && $v === '' && !empty($_POST['keep_secret'])) continue;
+            if ($v === '') {
+                Db::q("DELETE FROM settings WHERE `key`=?", ['turnstile.'.$f]);
+            } else {
+                Db::q("INSERT INTO settings(`key`,`value`) VALUES(?,?)
+                       ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)", ['turnstile.'.$f, $v]);
+            }
+        }
+        $_SESSION['flash_turnstile'] = ['type'=>'ok','msg'=>'Turnstile-instellingen opgeslagen.'];
+        header('Location: /admin/turnstile');
     }
 
     public function testSmtp(): void {

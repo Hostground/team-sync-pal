@@ -33,6 +33,7 @@ if ($user) {
       <a href="/admin/users">Gebruikers</a>
       <a href="/admin/types">Types</a>
       <a href="/admin/smtp">SMTP</a>
+      <a href="/admin/turnstile">Turnstile</a>
     <?php endif; ?>
     <a href="/settings">Instellingen</a>
     <form method="post" action="/logout" style="display:inline"><?= Csrf::field() ?><button class="linkbtn">Afmelden</button></form>

@@ -75,6 +75,8 @@ $router->post('/admin/types',      [\App\Controllers\AdminController::class, 'sa
 $router->post('/admin/types/{id}/delete', [\App\Controllers\AdminController::class, 'deleteType'], 'admin');
 $router->get('/admin/smtp',        [\App\Controllers\AdminController::class, 'smtp'],     'admin');
 $router->post('/admin/smtp',       [\App\Controllers\AdminController::class, 'saveSmtp'], 'admin');
+$router->get('/admin/turnstile',   [\App\Controllers\AdminController::class, 'turnstile'],     'admin');
+$router->post('/admin/turnstile',  [\App\Controllers\AdminController::class, 'saveTurnstile'], 'admin');
 $router->post('/admin/smtp/test',  [\App\Controllers\AdminController::class, 'testSmtp'], 'admin');
 
 // Takenlijsten (checklists)

@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers;
 
-use App\{Auth, Db, View, Csrf};
+use App\{Auth, Db, View, Csrf, Turnstile};
 
 class AuthController {
     public function root(): void {
@@ -16,6 +16,9 @@ class AuthController {
     public function login(): void {
         $email = $_POST['email'] ?? '';
         $pass  = $_POST['password'] ?? '';
+        if (!Turnstile::verify($_POST['cf-turnstile-response'] ?? null, $_SERVER['REMOTE_ADDR'] ?? null)) {
+            header('Location: /login?error=captcha'); exit;
+        }
         if (!Auth::login($email, $pass)) { header('Location: /login?error=1'); exit; }
         header('Location: /planning'); exit;
     }
@@ -26,6 +29,9 @@ class AuthController {
 
     public function register(): void {
         try {
+            if (!Turnstile::verify($_POST['cf-turnstile-response'] ?? null, $_SERVER['REMOTE_ADDR'] ?? null)) {
+                throw new \RuntimeException('Bot-controle mislukt. Probeer opnieuw.');
+            }
             $u = Auth::register(
                 $_POST['email'] ?? '',
                 $_POST['password'] ?? '',
