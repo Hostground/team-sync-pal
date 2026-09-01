@@ -12,7 +12,21 @@
     <p class="<?= $overdue?'overdue':'muted' ?>"><?= $overdue?'Verlopen':'Reageren voor' ?> <?= View::fmtDate($a['respond_by']) ?></p>
   <?php endif; ?>
   <?php if ($a['response_note']): ?><p><strong>Nota:</strong> <?= View::e($a['response_note']) ?></p><?php endif; ?>
+  <?php if (!empty($a['is_rolling'])): ?>
+    <p class="muted">Lopende activiteit — schuift automatisch door naar de volgende dag zolang ze niet afgerond is.
+    <?php if ((int)($a['rollover_count'] ?? 0) > 0): ?> Al <?= (int)$a['rollover_count'] ?>× doorgeschoven.<?php endif; ?>
+    <?php if (!empty($a['original_start_at'])): ?> Oorspronkelijk: <?= View::fmtDate($a['original_start_at']) ?>.<?php endif; ?></p>
+  <?php endif; ?>
+  <?php if (!empty($a['completed_at'])): ?><p class="muted">Afgerond op <?= View::fmtDate($a['completed_at']) ?></p><?php endif; ?>
 </div>
+
+<?php if (!in_array($a['status'], ['completed','cancelled'], true) && (Auth::isStaff() || $a['assignee_id']===Auth::id())): ?>
+<form method="post" action="/planning/<?= $a['id'] ?>/complete" class="card form">
+  <?= Csrf::field() ?>
+  <button class="btn" type="submit">Activiteit afronden</button>
+</form>
+<?php endif; ?>
+
 
 <?php if ($a['status']==='pending' && $a['assignee_id']===Auth::id()): ?>
 <form method="post" action="/planning/<?= $a['id'] ?>/respond" class="card form">
