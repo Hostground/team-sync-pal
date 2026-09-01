@@ -8,9 +8,10 @@ class PlanningController {
         $u = Auth::user();
         $where = '1=1'; $params = [];
         if (!Auth::isStaff()) { $where .= ' AND a.assignee_id = ?'; $params[] = $u['id']; }
-        if (!empty($_GET['status']) && in_array($_GET['status'], ['pending','confirmed','declined','auto_declined','cancelled'], true)) {
+        if (!empty($_GET['status']) && in_array($_GET['status'], ['pending','confirmed','declined','auto_declined','cancelled','completed'], true)) {
             $where .= ' AND a.status = ?'; $params[] = $_GET['status'];
         }
+        if (!empty($_GET['rolling'])) { $where .= ' AND a.is_rolling = 1'; }
         $rows = Db::all(
             "SELECT a.*, u.full_name AS assignee_name, t.name AS type_name, t.color AS type_color
              FROM activities a
