@@ -16,6 +16,7 @@
       <div class="row">
         <strong><?= View::e($a['title']) ?></strong>
         <span class="badge status-<?= $a['status'] ?>"><?= $a['status'] ?></span>
+        <?php if (!empty($a['is_rolling'])): ?><span class="badge">Lopend</span><?php endif; ?>
       </div>
       <div class="meta">
         <?= View::fmtDate($a['start_at'],'d/m H:i') ?> – <?= View::fmtDate($a['end_at'],'H:i') ?>
