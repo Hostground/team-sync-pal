@@ -243,3 +243,20 @@ Vervang `/usr/local/bin/php` door wat `which php` gaf, en `USER` door je cPanel 
 
 Klaar! Bij vragen: check eerst de error log in cPanel, dan `~/planning/config/config.php`,
 en dan de tabel `activity_audit_log` in phpMyAdmin voor het spoor van elke actie.
+
+## Update: lopende activiteiten (rolling)
+
+Draai deze SQL eenmalig op een bestaande database (phpMyAdmin → SQL):
+
+```sql
+ALTER TABLE activities
+  MODIFY status ENUM('pending','confirmed','declined','auto_declined','cancelled','completed') NOT NULL DEFAULT 'pending',
+  ADD COLUMN is_rolling TINYINT(1) NOT NULL DEFAULT 0,
+  ADD COLUMN completed_at DATETIME NULL,
+  ADD COLUMN completed_by CHAR(36) NULL,
+  ADD COLUMN rollover_count INT NOT NULL DEFAULT 0,
+  ADD COLUMN original_start_at DATETIME NULL;
+```
+
+De cron `cron/auto_escalate.php` schuift lopende, niet-afgeronde activiteiten
+automatisch één dag door en logt dit als `rolled_over` in de audit-log.
