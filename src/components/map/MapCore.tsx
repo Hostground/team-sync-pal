@@ -2,12 +2,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import { useEffect } from "react";
+import { DEFAULT_CENTER, DEFAULT_ZOOM, type LatLng } from "@/components/map/map-constants";
 
-export type LatLng = { lat: number; lng: number };
+export type { LatLng };
 
-/** Standaardlocatie: vaste werkplek (Riemst). */
-export const DEFAULT_CENTER: LatLng = { lat: 50.7857, lng: 5.0233 };
-export const DEFAULT_ZOOM = 16;
 
 const pinIcon = (color: string) =>
   L.divIcon({
