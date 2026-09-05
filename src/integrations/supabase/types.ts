@@ -25,6 +25,8 @@ export type Database = {
           end_at: string
           id: string
           is_rolling: boolean
+          lat: number | null
+          lng: number | null
           location: string | null
           original_start_at: string | null
           reminder_sent_at: string | null
@@ -49,6 +51,8 @@ export type Database = {
           end_at: string
           id?: string
           is_rolling?: boolean
+          lat?: number | null
+          lng?: number | null
           location?: string | null
           original_start_at?: string | null
           reminder_sent_at?: string | null
@@ -73,6 +77,8 @@ export type Database = {
           end_at?: string
           id?: string
           is_rolling?: boolean
+          lat?: number | null
+          lng?: number | null
           location?: string | null
           original_start_at?: string | null
           reminder_sent_at?: string | null
@@ -142,6 +148,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "activity_audit_log_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_photos: {
+        Row: {
+          activity_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          storage_path: string
+          taken_at: string | null
+          uploaded_by: string
+        }
+        Insert: {
+          activity_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          storage_path: string
+          taken_at?: string | null
+          uploaded_by: string
+        }
+        Update: {
+          activity_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          storage_path?: string
+          taken_at?: string | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_photos_activity_id_fkey"
             columns: ["activity_id"]
             isOneToOne: false
             referencedRelation: "activities"
