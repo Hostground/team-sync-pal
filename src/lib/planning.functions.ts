@@ -55,6 +55,9 @@ export const createActivity = createServerFn({ method: "POST" })
         start_at: data.start_at,
         end_at: data.end_at,
         location: data.location ?? null,
+        lat: data.lat ?? null,
+        lng: data.lng ?? null,
+
         description: data.description ?? null,
         respond_by: respondBy,
         is_rolling: data.is_rolling ?? false,
