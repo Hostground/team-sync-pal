@@ -47,15 +47,19 @@ class PlanningController {
 
         $isRolling = !empty($_POST['is_rolling']) ? 1 : 0;
 
+        $lat = ($_POST['lat'] ?? '') !== '' ? (float)$_POST['lat'] : null;
+        $lng = ($_POST['lng'] ?? '') !== '' ? (float)$_POST['lng'] : null;
+
         Db::q(
             'INSERT INTO activities
-             (id,title,type_id,assignee_id,created_by,customer,start_at,end_at,location,description,respond_by,template_id,is_rolling,original_start_at)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+             (id,title,type_id,assignee_id,created_by,customer,start_at,end_at,location,description,respond_by,template_id,is_rolling,original_start_at,lat,lng)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [$id, $title, $_POST['type_id'] ?: null, $assignee, Auth::id(),
              $_POST['customer'] ?: null, $start, $end,
              $_POST['location'] ?: null, $_POST['description'] ?: null,
-             $respondBy, $_POST['template_id'] ?: null, $isRolling, $start]
+             $respondBy, $_POST['template_id'] ?: null, $isRolling, $start, $lat, $lng]
         );
+
 
 
         Audit::log($id, Auth::id(), 'created', null, 'pending');
