@@ -55,6 +55,12 @@ $router->get('/planning/{id}',  [\App\Controllers\PlanningController::class, 'sh
 $router->post('/planning/{id}/respond', [\App\Controllers\PlanningController::class, 'respond'], 'auth');
 $router->post('/planning/{id}/complete', [\App\Controllers\PlanningController::class, 'complete'], 'auth');
 
+// Foto's en kaartlocatie bij een activiteit
+$router->get('/planning/{id}/photos',   [\App\Controllers\PhotoController::class, 'index'], 'auth');
+$router->post('/planning/{id}/photos',  [\App\Controllers\PhotoController::class, 'store'], 'auth');
+$router->post('/planning/{id}/location',[\App\Controllers\PhotoController::class, 'saveLocation'], 'auth');
+$router->post('/photos/{id}/delete',    [\App\Controllers\PhotoController::class, 'delete'], 'auth');
+
 $router->get('/notifications',      [\App\Controllers\NotificationController::class, 'index'],   'auth');
 $router->post('/notifications/read',[\App\Controllers\NotificationController::class, 'markRead'], 'auth');
 $router->post('/push/subscribe',    [\App\Controllers\NotificationController::class, 'subscribe'],'auth');

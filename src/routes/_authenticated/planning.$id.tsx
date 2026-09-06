@@ -3,9 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { respondActivity, getActivityAuditLog, completeActivity } from "@/lib/planning.functions";
+import { respondActivity, getActivityAuditLog, completeActivity, setActivityLocation } from "@/lib/planning.functions";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { ChecklistPanel } from "@/components/ChecklistPanel";
+import { ActivityMap } from "@/components/ActivityMap";
+import { ActivityPhotos, type ActivityPhoto } from "@/components/ActivityPhotos";
+import { LocationPicker } from "@/components/LocationPicker";
+import type { LatLng } from "@/components/map/map-constants";
+
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +42,11 @@ function ActivityDetail() {
   const complete = useServerFn(completeActivity);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const [photos, setPhotos] = useState<ActivityPhoto[]>([]);
+  const [editPin, setEditPin] = useState(false);
+  const [pin, setPin] = useState<LatLng | null>(null);
+  const saveLocation = useServerFn(setActivityLocation);
+
 
   const { data: a, refetch } = useQuery({
     queryKey: ["activity", id],
@@ -87,6 +98,8 @@ function ActivityDetail() {
   const st = statusMeta[a.status] ?? statusMeta.pending;
   const isAssignee = me?.user.id === a.assignee_id;
   const canRespond = isAssignee && a.status === "pending";
+  const canEditPin = isAssignee || isStaff(me?.role);
+
   const canComplete =
     (isAssignee || isStaff(me?.role)) &&
     !["completed", "cancelled"].includes(a.status);
@@ -201,6 +214,84 @@ function ActivityDetail() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MapPin className="h-4 w-4" /> Locatie
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {editPin ? (
+            <>
+              <LocationPicker value={pin} onChange={setPin} />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await saveLocation({
+                        data: { activity_id: id, lat: pin?.lat ?? null, lng: pin?.lng ?? null },
+                      });
+                      toast.success("Locatie opgeslagen");
+                      setEditPin(false);
+                      refetch();
+                    } catch (e: any) {
+                      toast.error(e.message);
+                    }
+                  }}
+                >
+                  Opslaan
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditPin(false)}>
+                  Annuleren
+                </Button>
+              </div>
+            </>
+          ) : a.lat != null && a.lng != null ? (
+            <>
+              <ActivityMap
+                point={{ lat: a.lat, lng: a.lng }}
+                photoPins={photos
+                  .filter((p) => p.lat != null && p.lng != null)
+                  .map((p) => ({ lat: p.lat as number, lng: p.lng as number, title: "Foto" }))}
+                label={a.location ?? null}
+              />
+              {canEditPin && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setPin({ lat: a.lat, lng: a.lng });
+                    setEditPin(true);
+                  }}
+                >
+                  Pin aanpassen
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">Nog geen pin op de kaart gezet.</p>
+              {canEditPin && (
+                <Button size="sm" variant="outline" onClick={() => setEditPin(true)}>
+                  Pin op kaart zetten
+                </Button>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <ActivityPhotos
+        activityId={id}
+        canEdit={isAssignee || isStaff(me?.role)}
+        currentUserId={me?.user.id}
+        isStaffUser={isStaff(me?.role)}
+        onPhotosChange={setPhotos}
+      />
+
+
 
       <ChecklistPanel
         activityId={id}

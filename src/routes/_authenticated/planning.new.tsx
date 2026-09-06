@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
+import { LocationPicker } from "@/components/LocationPicker";
+import type { LatLng } from "@/components/map/map-constants";
+
 
 export const Route = createFileRoute("/_authenticated/planning/new")({
   component: NewActivity,
@@ -48,6 +51,8 @@ function NewActivity() {
     template_name: "",
   });
   const [loading, setLoading] = useState(false);
+  const [pin, setPin] = useState<LatLng | null>(null);
+
 
   const applyTemplate = (id: string) => {
     const t: any = templates.find((x: any) => x.id === id);
@@ -77,6 +82,9 @@ function NewActivity() {
           start_at: new Date(form.start_at).toISOString(),
           end_at: new Date(form.end_at).toISOString(),
           location: form.location || null,
+          lat: pin?.lat ?? null,
+          lng: pin?.lng ?? null,
+
           description: form.description || null,
           response_window_hours: form.response_window_hours,
           is_rolling: form.is_rolling,
@@ -181,6 +189,8 @@ function NewActivity() {
               <Label htmlFor="loc">Locatie</Label>
               <Input id="loc" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
             </div>
+            <LocationPicker value={pin} onChange={setPin} />
+
             <div>
               <Label htmlFor="desc">Omschrijving</Label>
               <Textarea id="desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />

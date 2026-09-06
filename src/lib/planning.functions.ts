@@ -9,6 +9,9 @@ const CreateActivitySchema = z.object({
   start_at: z.string(),
   end_at: z.string(),
   location: z.string().max(200).optional().nullable(),
+  lat: z.number().min(-90).max(90).optional().nullable(),
+  lng: z.number().min(-180).max(180).optional().nullable(),
+
   description: z.string().max(2000).optional().nullable(),
   respond_by: z.string().optional(),
   response_window_hours: z.number().min(1).max(720).optional(),
@@ -52,6 +55,9 @@ export const createActivity = createServerFn({ method: "POST" })
         start_at: data.start_at,
         end_at: data.end_at,
         location: data.location ?? null,
+        lat: data.lat ?? null,
+        lng: data.lng ?? null,
+
         description: data.description ?? null,
         respond_by: respondBy,
         is_rolling: data.is_rolling ?? false,
@@ -414,4 +420,26 @@ export const getActivityAuditLog = createServerFn({ method: "POST" })
       : { data: [] as any[] };
     const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
     return (rows ?? []).map((r: any) => ({ ...r, actor: r.actor_id ? map.get(r.actor_id) ?? null : null }));
+  });
+
+/** Locatiepin van een activiteit aanpassen (management/admin of toegewezen medewerker). */
+export const setActivityLocation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        activity_id: z.string().uuid(),
+        lat: z.number().min(-90).max(90).nullable(),
+        lng: z.number().min(-180).max(180).nullable(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase
+      .from("activities")
+      .update({ lat: data.lat, lng: data.lng })
+      .eq("id", data.activity_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
