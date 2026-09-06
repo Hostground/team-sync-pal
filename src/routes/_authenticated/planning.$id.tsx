@@ -42,6 +42,11 @@ function ActivityDetail() {
   const complete = useServerFn(completeActivity);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const [photos, setPhotos] = useState<ActivityPhoto[]>([]);
+  const [editPin, setEditPin] = useState(false);
+  const [pin, setPin] = useState<LatLng | null>(null);
+  const saveLocation = useServerFn(setActivityLocation);
+
 
   const { data: a, refetch } = useQuery({
     queryKey: ["activity", id],
