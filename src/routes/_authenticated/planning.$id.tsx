@@ -3,9 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { respondActivity, getActivityAuditLog, completeActivity } from "@/lib/planning.functions";
+import { respondActivity, getActivityAuditLog, completeActivity, setActivityLocation } from "@/lib/planning.functions";
 import { useCurrentUser, isStaff } from "@/lib/use-current-user";
 import { ChecklistPanel } from "@/components/ChecklistPanel";
+import { ActivityMap } from "@/components/ActivityMap";
+import { ActivityPhotos, type ActivityPhoto } from "@/components/ActivityPhotos";
+import { LocationPicker } from "@/components/LocationPicker";
+import { Card as MapCard, CardContent as MapCardContent, CardHeader as MapCardHeader, CardTitle as MapCardTitle } from "@/components/ui/card";
+import type { LatLng } from "@/components/map/map-constants";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
