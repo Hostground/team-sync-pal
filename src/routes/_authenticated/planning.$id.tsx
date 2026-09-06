@@ -9,7 +9,7 @@ import { ChecklistPanel } from "@/components/ChecklistPanel";
 import { ActivityMap } from "@/components/ActivityMap";
 import { ActivityPhotos, type ActivityPhoto } from "@/components/ActivityPhotos";
 import { LocationPicker } from "@/components/LocationPicker";
-import { Card as MapCard, CardContent as MapCardContent, CardHeader as MapCardHeader, CardTitle as MapCardTitle } from "@/components/ui/card";
+import type { LatLng } from "@/components/map/map-constants";
 import type { LatLng } from "@/components/map/map-constants";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
