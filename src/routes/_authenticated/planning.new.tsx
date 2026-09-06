@@ -82,6 +82,9 @@ function NewActivity() {
           start_at: new Date(form.start_at).toISOString(),
           end_at: new Date(form.end_at).toISOString(),
           location: form.location || null,
+          lat: pin?.lat ?? null,
+          lng: pin?.lng ?? null,
+
           description: form.description || null,
           response_window_hours: form.response_window_hours,
           is_rolling: form.is_rolling,
