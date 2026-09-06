@@ -181,6 +181,8 @@ function NewActivity() {
               <Label htmlFor="loc">Locatie</Label>
               <Input id="loc" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
             </div>
+            <LocationPicker value={pin} onChange={setPin} />
+
             <div>
               <Label htmlFor="desc">Omschrijving</Label>
               <Textarea id="desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
