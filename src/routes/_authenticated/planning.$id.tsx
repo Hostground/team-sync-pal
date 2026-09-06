@@ -98,6 +98,8 @@ function ActivityDetail() {
   const st = statusMeta[a.status] ?? statusMeta.pending;
   const isAssignee = me?.user.id === a.assignee_id;
   const canRespond = isAssignee && a.status === "pending";
+  const canEditPin = isAssignee || isStaff(me?.role);
+
   const canComplete =
     (isAssignee || isStaff(me?.role)) &&
     !["completed", "cancelled"].includes(a.status);
