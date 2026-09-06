@@ -51,6 +51,8 @@ function NewActivity() {
     template_name: "",
   });
   const [loading, setLoading] = useState(false);
+  const [pin, setPin] = useState<LatLng | null>(null);
+
 
   const applyTemplate = (id: string) => {
     const t: any = templates.find((x: any) => x.id === id);
