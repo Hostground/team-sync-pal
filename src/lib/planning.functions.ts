@@ -421,3 +421,25 @@ export const getActivityAuditLog = createServerFn({ method: "POST" })
     const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
     return (rows ?? []).map((r: any) => ({ ...r, actor: r.actor_id ? map.get(r.actor_id) ?? null : null }));
   });
+
+/** Locatiepin van een activiteit aanpassen (management/admin of toegewezen medewerker). */
+export const setActivityLocation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        activity_id: z.string().uuid(),
+        lat: z.number().min(-90).max(90).nullable(),
+        lng: z.number().min(-180).max(180).nullable(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase
+      .from("activities")
+      .update({ lat: data.lat, lng: data.lng })
+      .eq("id", data.activity_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
