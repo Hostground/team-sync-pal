@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
+import { LocationPicker } from "@/components/LocationPicker";
+import type { LatLng } from "@/components/map/map-constants";
+
 
 export const Route = createFileRoute("/_authenticated/planning/new")({
   component: NewActivity,
