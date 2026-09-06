@@ -170,6 +170,24 @@ INSERT INTO settings(`key`,`value`) VALUES
   ('allow_per_activity_override','1')
 ON DUPLICATE KEY UPDATE `value`=VALUES(`value`);
 
+-- Coördinaten voor de kaart bij een activiteit
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS lat DOUBLE NULL;
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS lng DOUBLE NULL;
+
+CREATE TABLE IF NOT EXISTS activity_photos (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  activity_id CHAR(36) NOT NULL,
+  path VARCHAR(255) NOT NULL,
+  caption VARCHAR(300) NULL,
+  lat DOUBLE NULL,
+  lng DOUBLE NULL,
+  taken_at DATETIME NULL,
+  uploaded_by CHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_photo_act (activity_id),
+  CONSTRAINT fk_photo_act FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET FOREIGN_KEY_CHECKS=1;
 
 -- =============================
