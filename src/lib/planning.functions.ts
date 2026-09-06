@@ -9,6 +9,9 @@ const CreateActivitySchema = z.object({
   start_at: z.string(),
   end_at: z.string(),
   location: z.string().max(200).optional().nullable(),
+  lat: z.number().min(-90).max(90).optional().nullable(),
+  lng: z.number().min(-180).max(180).optional().nullable(),
+
   description: z.string().max(2000).optional().nullable(),
   respond_by: z.string().optional(),
   response_window_hours: z.number().min(1).max(720).optional(),
