@@ -213,6 +213,84 @@ function ActivityDetail() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MapPin className="h-4 w-4" /> Locatie
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {editPin ? (
+            <>
+              <LocationPicker value={pin} onChange={setPin} />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await saveLocation({
+                        data: { activity_id: id, lat: pin?.lat ?? null, lng: pin?.lng ?? null },
+                      });
+                      toast.success("Locatie opgeslagen");
+                      setEditPin(false);
+                      refetch();
+                    } catch (e: any) {
+                      toast.error(e.message);
+                    }
+                  }}
+                >
+                  Opslaan
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditPin(false)}>
+                  Annuleren
+                </Button>
+              </div>
+            </>
+          ) : a.lat != null && a.lng != null ? (
+            <>
+              <ActivityMap
+                point={{ lat: a.lat, lng: a.lng }}
+                photoPins={photos
+                  .filter((p) => p.lat != null && p.lng != null)
+                  .map((p) => ({ lat: p.lat as number, lng: p.lng as number, title: "Foto" }))}
+                label={a.location ?? null}
+              />
+              {canEditPin && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setPin({ lat: a.lat, lng: a.lng });
+                    setEditPin(true);
+                  }}
+                >
+                  Pin aanpassen
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">Nog geen pin op de kaart gezet.</p>
+              {canEditPin && (
+                <Button size="sm" variant="outline" onClick={() => setEditPin(true)}>
+                  Pin op kaart zetten
+                </Button>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <ActivityPhotos
+        activityId={id}
+        canEdit={isAssignee || isStaff(me?.role)}
+        currentUserId={me?.user.id}
+        isStaffUser={isStaff(me?.role)}
+        onPhotosChange={setPhotos}
+      />
+
+
+
       <ChecklistPanel
         activityId={id}
         onAllDone={
