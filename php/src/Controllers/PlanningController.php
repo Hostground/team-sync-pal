@@ -28,7 +28,7 @@ class PlanningController {
         $employees = Db::all("SELECT u.id, u.full_name FROM users u JOIN user_roles r ON r.user_id=u.id WHERE r.role='employee' ORDER BY u.full_name");
         $types = Db::all('SELECT id, name FROM activity_types WHERE active=1 ORDER BY name');
         $templates = Db::all('SELECT * FROM activity_templates WHERE owner_id = ? ORDER BY name', [Auth::id()]);
-        View::render('planning/new', compact('employees','types','templates') + ['title'=>'Nieuwe activiteit']);
+        View::render('planning/new', compact('employees','types','templates') + ['title'=>'Nieuwe activiteit', 'useMap'=>true]);
     }
 
     public function store(): void {
@@ -123,7 +123,7 @@ class PlanningController {
 
         View::render('planning/show', [
             'title' => $a['title'], 'a' => $a, 'audit' => $audit, 'deliveries' => $deliveries,
-            'checklistTemplates' => $checklistTemplates, 'copyOptions' => $copyOptions,
+            'checklistTemplates' => $checklistTemplates, 'copyOptions' => $copyOptions, 'useMap' => true,
         ]);
     }
 
