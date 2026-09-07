@@ -28,6 +28,19 @@
   <label>Start<input type="datetime-local" name="start_at" id="start_at" required></label>
   <label>Einde<input type="datetime-local" name="end_at" id="end_at" required></label>
   <label>Locatie<input name="location" id="location"></label>
+  <div class="map-field">
+    <span class="label-text">Plaats op de kaart (klik of versleep de pin)</span>
+    <div class="map-box" data-map-picker data-lat-input="lat" data-lng-input="lng"></div>
+    <input type="hidden" name="lat" id="lat">
+    <input type="hidden" name="lng" id="lng">
+    <div class="map-actions">
+      <button type="button" class="btn small" data-map-gps>Mijn locatie</button>
+      <button type="button" class="btn small" data-map-default>Vaste werkplek</button>
+      <button type="button" class="btn small" data-map-clear>Pin wissen</button>
+      <span class="muted map-coords">Geen pin</span>
+    </div>
+  </div>
+
   <label>Omschrijving<textarea name="description" id="description" rows="3"></textarea></label>
   <label>Bevestigingstermijn (uren, leeg = standaard)<input type="number" min="1" max="720" name="response_window_hours"></label>
   <label class="inline"><input type="checkbox" name="is_rolling" value="1"> Lopende activiteit (schuift automatisch door naar de volgende dag zolang ze niet afgerond is)</label>
