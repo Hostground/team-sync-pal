@@ -13,6 +13,9 @@ if ($user) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= View::e($title ?? 'Planning') ?> — <?= View::e(\App\Config::get('app.name','Planning')) ?></title>
 <link rel="stylesheet" href="/assets/app.css">
+<?php if (!empty($useMap)): ?>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<?php endif; ?>
 </head>
 <body>
 <?php if ($user): ?>
@@ -43,5 +46,9 @@ if ($user) {
 <main class="container"><?= $content ?></main>
 <script>window.CSRF_TOKEN = <?= json_encode(Csrf::token()) ?>;</script>
 <script src="/assets/app.js"></script>
+<?php if (!empty($useMap)): ?>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/assets/map.js"></script>
+<?php endif; ?>
 </body>
 </html>
