@@ -104,3 +104,15 @@
 .cal-mini-day.out{visibility:hidden}
 .cal-mini-day.lvl1{background:#dbeafe}.cal-mini-day.lvl2{background:#93c5fd}.cal-mini-day.lvl3{background:#2563eb;color:#fff}
 .cal-mini-day.today{outline:1px solid var(--pri)}
+
+/* ==== Kaart en foto's bij een activiteit ==== */
+.map-field { display: block; margin: .75rem 0; }
+.label-text { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .35rem; }
+.map-box { height: 260px; border-radius: 10px; overflow: hidden; border: 1px solid #d8dde3; }
+.map-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: .5rem; }
+.btn.small { padding: .3rem .6rem; font-size: .85rem; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .6rem; margin-top: .6rem; }
+.photo-tile { margin: 0; }
+.photo-tile img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; display: block; }
+.photo-tile figcaption { font-size: .75rem; color: #667085; display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; margin-top: .25rem; }
+@media (max-width: 640px) { .map-box { height: 300px; } }

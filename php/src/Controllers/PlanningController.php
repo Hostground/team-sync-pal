@@ -125,7 +125,7 @@ class PlanningController {
 
         View::render('planning/show', [
             'title' => $a['title'], 'a' => $a, 'audit' => $audit, 'deliveries' => $deliveries,
-            'checklistTemplates' => $checklistTemplates, 'copyOptions' => $copyOptions, 'useMap' => true,
+            'checklistTemplates' => $checklistTemplates, 'copyOptions' => $copyOptions, 'useMap' => true, 'photos' => $photos,
         ]);
     }
 
