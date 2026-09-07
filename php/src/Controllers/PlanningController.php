@@ -115,6 +115,8 @@ class PlanningController {
         }
 
         $checklistTemplates = Db::all('SELECT id, name FROM checklist_templates ORDER BY name');
+        $photos = Db::all('SELECT lat, lng FROM activity_photos WHERE activity_id = ?', [$p['id']]);
+
         $copyOptions = Auth::isStaff()
             ? Db::all("SELECT DISTINCT a.id, a.title FROM activities a
                        JOIN checklist_items c ON c.activity_id = a.id
