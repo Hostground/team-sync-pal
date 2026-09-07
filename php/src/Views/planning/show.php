@@ -39,6 +39,57 @@
 </form>
 <?php endif; ?>
 
+<h2>Locatie op de kaart</h2>
+<div class="card">
+  <?php if ($a['lat'] !== null && $a['lng'] !== null): ?>
+    <div class="map-box" data-map-view
+         data-lat="<?= View::e((string)$a['lat']) ?>" data-lng="<?= View::e((string)$a['lng']) ?>"
+         data-label="<?= View::e($a['location'] ?: $a['title']) ?>"
+         data-photo-pins='<?= View::e(json_encode(array_values(array_map(
+              fn($p) => ['lat'=>(float)$p['lat'],'lng'=>(float)$p['lng']],
+              array_filter($photos ?? [], fn($p) => $p['lat'] !== null && $p['lng'] !== null)
+         )))) ?>'></div>
+    <p class="map-actions">
+      <a class="btn small" target="_blank" rel="noopener"
+         href="https://www.openstreetmap.org/?mlat=<?= (float)$a['lat'] ?>&mlon=<?= (float)$a['lng'] ?>#map=17/<?= (float)$a['lat'] ?>/<?= (float)$a['lng'] ?>">Route / openen in kaart</a>
+      <span class="muted"><?= (float)$a['lat'] ?>, <?= (float)$a['lng'] ?></span>
+    </p>
+  <?php else: ?>
+    <p class="muted">Nog geen pin op de kaart gezet.</p>
+  <?php endif; ?>
+
+  <?php if (Auth::isStaff() || $a['assignee_id'] === Auth::id()): ?>
+  <form method="post" action="/planning/<?= $a['id'] ?>/location" class="map-field">
+    <?= Csrf::field() ?>
+    <span class="label-text">Pin aanpassen</span>
+    <div class="map-box" data-map-picker data-lat-input="pin_lat" data-lng-input="pin_lng"></div>
+    <input type="hidden" name="lat" id="pin_lat" value="<?= $a['lat'] !== null ? View::e((string)$a['lat']) : '' ?>">
+    <input type="hidden" name="lng" id="pin_lng" value="<?= $a['lng'] !== null ? View::e((string)$a['lng']) : '' ?>">
+    <div class="map-actions">
+      <button type="button" class="btn small" data-map-gps>Mijn locatie</button>
+      <button type="button" class="btn small" data-map-default>Vaste werkplek</button>
+      <button type="button" class="btn small" data-map-clear>Pin wissen</button>
+      <span class="muted map-coords"><?= $a['lat'] !== null ? View::e((string)$a['lat'].', '.$a['lng']) : 'Geen pin' ?></span>
+      <button class="btn small primary" type="submit">Locatie bewaren</button>
+    </div>
+  </form>
+  <?php endif; ?>
+</div>
+
+<h2>Foto's</h2>
+<div class="card" data-photos data-activity="<?= $a['id'] ?>" data-csrf="<?= View::e(Csrf::token()) ?>"
+     data-staff="<?= Auth::isStaff() ? '1' : '0' ?>" data-me="<?= View::e(Auth::id()) ?>">
+  <?php if (Auth::isStaff() || $a['assignee_id'] === Auth::id()): ?>
+  <label class="label-text">Foto's toevoegen (camera of galerij)
+    <input type="file" accept="image/*" capture="environment" multiple>
+  </label>
+  <label class="inline"><input type="checkbox" data-photo-gps checked> Huidige locatie bij de foto bewaren</label>
+  <p class="muted" data-photo-status></p>
+  <?php endif; ?>
+  <div class="photo-grid" data-photo-grid></div>
+</div>
+
+
 <?php
   $checklistScope = ['activity_id' => $a['id']];
   $checklistTemplates = $checklistTemplates ?? [];
