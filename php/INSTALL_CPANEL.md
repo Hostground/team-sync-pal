@@ -260,3 +260,14 @@ ALTER TABLE activities
 
 De cron `cron/auto_escalate.php` schuift lopende, niet-afgeronde activiteiten
 automatisch één dag door en logt dit als `rolled_over` in de audit-log.
+
+## Update: foto's en kaart bij een activiteit
+
+1. Voer in phpMyAdmin de nieuwe regels onderaan `config/schema.sql` uit
+   (`ALTER TABLE activities ADD COLUMN lat/lng` en de tabel `activity_photos`).
+   Krijg je "duplicate column" bij lat/lng? Dan bestaan die al — negeren.
+2. Zorg dat de map `public/uploads/activities` bestaat en schrijfbaar is (rechten 755).
+3. Foto's mogen max. 15 MB zijn (JPG, PNG of WEBP). Staat je server lager
+   (`upload_max_filesize` / `post_max_size` in cPanel → MultiPHP INI Editor),
+   verhoog die dan naar minstens 16M.
+4. De kaart gebruikt OpenStreetMap via Leaflet vanaf een CDN — geen API-key nodig.
