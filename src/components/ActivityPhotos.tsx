@@ -86,9 +86,11 @@ export function ActivityPhotos({
 
   const upload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const pos = withLocation ? await getPosition() : null;
     setBusy(files.length);
+    const pos = withLocation ? await getPosition() : null;
+    if (withLocation && !pos) toast.info("Locatie niet beschikbaar – foto wordt zonder locatie bewaard");
     let ok = 0;
+
     for (const file of Array.from(files)) {
       try {
         if (!file.type.startsWith("image/")) throw new Error("Alleen afbeeldingen");
