@@ -33,8 +33,6 @@ function getPosition(): Promise<{ lat: number; lng: number } | null> {
       done = true;
       resolve(v);
     };
-    // Harde noodrem: als de browser nooit antwoordt (geen toestemming, geen prompt),
-    // gaan we alsnog door met uploaden zonder locatie.
     const timer = setTimeout(() => finish(null), 9000);
     navigator.geolocation.getCurrentPosition(
       (p) => {
@@ -50,6 +48,31 @@ function getPosition(): Promise<{ lat: number; lng: number } | null> {
   });
 }
 
+function uploadWithProgress(
+  file: File,
+  url: string,
+  onProgress: (pct: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url, true);
+    xhr.setRequestHeader("Content-Type", file.type);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      } else {
+        onProgress(50);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload mislukt (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error("Netwerkfout bij uploaden"));
+    xhr.onabort = () => reject(new Error("Upload geannuleerd"));
+    xhr.send(file);
+  });
+}
 
 export function ActivityPhotos({
   activityId,
@@ -71,6 +94,7 @@ export function ActivityPhotos({
 
   const [withLocation, setWithLocation] = useState(true);
   const [busy, setBusy] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [zoom, setZoom] = useState<ActivityPhoto | null>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -87,22 +111,21 @@ export function ActivityPhotos({
   const upload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setBusy(files.length);
+    setProgress(0);
     const pos = withLocation ? await getPosition() : null;
     if (withLocation && !pos) toast.info("Locatie niet beschikbaar – foto wordt zonder locatie bewaard");
     let ok = 0;
 
-    for (const file of Array.from(files)) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       try {
         if (!file.type.startsWith("image/")) throw new Error("Alleen afbeeldingen");
         const { path, signedUrl } = await makeUrl({
           data: { activity_id: activityId, filename: file.name },
         });
-        const res = await fetch(signedUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file,
+        await uploadWithProgress(file, signedUrl, (pct) => {
+          setProgress(Math.round(((i + pct / 100) / files.length) * 100));
         });
-        if (!res.ok) throw new Error("Uploaden mislukt");
         await register({
           data: {
             activity_id: activityId,
@@ -119,6 +142,8 @@ export function ActivityPhotos({
         setBusy((b) => b - 1);
       }
     }
+
+    setProgress(0);
     if (ok > 0) {
       toast.success(ok === 1 ? "Foto toegevoegd" : `${ok} foto's toegevoegd`);
       refetch();
@@ -186,7 +211,17 @@ export function ActivityPhotos({
               />
               Locatie meesturen met de foto
             </label>
-            {busy > 0 && <p className="text-xs text-muted-foreground">Uploaden… ({busy})</p>}
+            {busy > 0 && (
+              <div className="space-y-1">
+                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-200"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Uploaden… {progress}%</p>
+              </div>
+            )}
           </>
         )}
 
