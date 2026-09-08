@@ -26,14 +26,30 @@ export type ActivityPhoto = {
 
 function getPosition(): Promise<{ lat: number; lng: number } | null> {
   return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve(null);
+    if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
+    let done = false;
+    const finish = (v: { lat: number; lng: number } | null) => {
+      if (done) return;
+      done = true;
+      resolve(v);
+    };
+    // Harde noodrem: als de browser nooit antwoordt (geen toestemming, geen prompt),
+    // gaan we alsnog door met uploaden zonder locatie.
+    const timer = setTimeout(() => finish(null), 9000);
     navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => resolve(null),
-      { enableHighAccuracy: true, timeout: 8000 },
+      (p) => {
+        clearTimeout(timer);
+        finish({ lat: p.coords.latitude, lng: p.coords.longitude });
+      },
+      () => {
+        clearTimeout(timer);
+        finish(null);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
     );
   });
 }
+
 
 export function ActivityPhotos({
   activityId,
