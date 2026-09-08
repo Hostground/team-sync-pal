@@ -33,18 +33,23 @@ function getPosition(): Promise<{ lat: number; lng: number } | null> {
       done = true;
       resolve(v);
     };
-    const timer = setTimeout(() => finish(null), 9000);
-    navigator.geolocation.getCurrentPosition(
-      (p) => {
-        clearTimeout(timer);
-        finish({ lat: p.coords.latitude, lng: p.coords.longitude });
-      },
-      () => {
-        clearTimeout(timer);
-        finish(null);
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
-    );
+    const timer = setTimeout(() => finish(null), 5000);
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (p) => {
+          clearTimeout(timer);
+          finish({ lat: p.coords.latitude, lng: p.coords.longitude });
+        },
+        () => {
+          clearTimeout(timer);
+          finish(null);
+        },
+        { enableHighAccuracy: false, timeout: 4000, maximumAge: 120000 },
+      );
+    } catch {
+      clearTimeout(timer);
+      finish(null);
+    }
   });
 }
 
@@ -110,22 +115,23 @@ export function ActivityPhotos({
 
   const upload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    setBusy(files.length);
+    const selectedFiles = Array.from(files);
+    setBusy(selectedFiles.length);
     setProgress(0);
-    const pos = withLocation ? await getPosition() : null;
-    if (withLocation && !pos) toast.info("Locatie niet beschikbaar – foto wordt zonder locatie bewaard");
+    const positionPromise = withLocation ? getPosition() : Promise.resolve(null);
     let ok = 0;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
       try {
         if (!file.type.startsWith("image/")) throw new Error("Alleen afbeeldingen");
         const { path, signedUrl } = await makeUrl({
           data: { activity_id: activityId, filename: file.name },
         });
         await uploadWithProgress(file, signedUrl, (pct) => {
-          setProgress(Math.round(((i + pct / 100) / files.length) * 100));
+          setProgress(Math.round(((i + pct / 100) / selectedFiles.length) * 100));
         });
+        const pos = await positionPromise;
         await register({
           data: {
             activity_id: activityId,
@@ -143,6 +149,8 @@ export function ActivityPhotos({
       }
     }
 
+    const pos = await positionPromise;
+    if (withLocation && !pos) toast.info("Locatie niet beschikbaar – foto wordt zonder locatie bewaard");
     setProgress(0);
     if (ok > 0) {
       toast.success(ok === 1 ? "Foto toegevoegd" : `${ok} foto's toegevoegd`);
